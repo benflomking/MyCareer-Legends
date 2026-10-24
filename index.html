@@ -69,7 +69,7 @@ button{border:0;border-radius:13px;background:#f3cd68;color:#101820;font-weight:
 <script type="module">
 import * as T from 'three';
 const $=id=>document.getElementById(id);
-let active=false,career=false,training=false,selectedLegend='maradona',keys=new Set(),zoom=false,score=0,msgT=0,commentT=0,fakeT=0,kickT=0,celebrateT=0,jumpT=0,headerT=0,handT=0,dunkT=0,juggleT=0,juggleQueue=0,juggleCount=0,juggleHeight=0,juggleVel=0,cornerMode=false,penaltyMode=false,handGoalPending=false,passT=0,passTarget=null,matchTime=90,ceremonyStarted=false,stamina=100;
+let active=false,career=false,training=false,selectedLegend='maradona',keys=new Set(),zoom=false,score=0,msgT=0,commentT=0,fakeT=0,kickT=0,celebrateT=0,jumpT=0,headerT=0,headerContactPending=false,handT=0,dunkT=0,juggleT=0,juggleQueue=0,juggleCount=0,juggleHeight=0,juggleVel=0,cornerMode=false,penaltyMode=false,handGoalPending=false,passT=0,passTarget=null,matchTime=90,ceremonyStarted=false,stamina=100;
 const presets={
  maradona:{name:'MARADONA',num:10,match:'ארגנטינה נגד אנגליה',desc:'מראדונה • ארגנטינה נגד אנגליה',shirt:0x84cef5,shorts:0x171d28,sport:'football'},
  pele:{name:'PELÉ',num:10,match:'ברזיל נגד אורוגוואי',desc:'פלה • ברזיל נגד אורוגוואי',shirt:0xf3db32,shorts:0x2456a6,sport:'football'},
@@ -416,7 +416,7 @@ function showLineup(){
    });
  },6500);
 }
-function start(c,isTraining=false){career=c;training=isTraining;active=false;$('menu').hidden=true;$('ui').hidden=true;px=0;pz=8;score=0;matchTime=90;ceremonyStarted=false;$('matchClock').textContent='90';stamina=100;juggleT=0;juggleQueue=0;juggleCount=0;juggleHeight=0;juggleVel=0;jumpT=0;headerT=0;handT=0;dunkT=0;cornerMode=false;penaltyMode=false;handGoalPending=false;passT=0;passTarget=null;$('juggleText').textContent='';$('commentary').textContent='';player.rotation.y=Math.PI;defenders[0].position.set(-2.8,0,-4);defenders[1].position.set(2.5,0,-7);defenders[2].position.set(-1.2,0,-11);defenders[3].position.set(1.5,0,-15);keeper.position.set(0,0,-22.2);keeper2.position.set(0,0,22.2);const tPos=[[-5.5,8],[0,9],[5.5,8],[-6.5,3],[-2.2,2],[2.2,2],[6.5,3],[-4.2,-4],[0,-6],[4.2,-4]];
+function start(c,isTraining=false){career=c;training=isTraining;active=false;$('menu').hidden=true;$('ui').hidden=true;px=0;pz=8;score=0;matchTime=90;ceremonyStarted=false;$('matchClock').textContent='90';stamina=100;juggleT=0;juggleQueue=0;juggleCount=0;juggleHeight=0;juggleVel=0;jumpT=0;headerT=0;headerContactPending=false;handT=0;dunkT=0;cornerMode=false;penaltyMode=false;handGoalPending=false;passT=0;passTarget=null;$('juggleText').textContent='';$('commentary').textContent='';player.rotation.y=Math.PI;defenders[0].position.set(-2.8,0,-4);defenders[1].position.set(2.5,0,-7);defenders[2].position.set(-1.2,0,-11);defenders[3].position.set(1.5,0,-15);keeper.position.set(0,0,-22.2);keeper2.position.set(0,0,22.2);const tPos=[[-5.5,8],[0,9],[5.5,8],[-6.5,3],[-2.2,2],[2.2,2],[6.5,3],[-4.2,-4],[0,-6],[4.2,-4]];
 teammates.forEach((t,i)=>t.position.set(tPos[i][0],0,tPos[i][1]));
 const oPos=[[-5.5,-3],[0,-4],[5.5,-3],[-6.2,-8],[-2.2,-9],[2.2,-9],[6.2,-8],[-4,-14],[0,-16],[4,-14]];
 opponentPlayers.forEach((t,i)=>t.position.set(oPos[i][0],0,oPos[i][1]));zoom=!!c;applyLegend();$('cam').textContent=zoom?'מצלמה: קריירה':'מצלמה: משחק';
@@ -458,13 +458,17 @@ if(e.code==='KeyP'&&presets[selectedLegend].sport==='football'){
 }
 if(e.code==='KeyQ'){
  const sport=presets[selectedLegend].sport;
- jumpT=.65;
+ jumpT=.72;
  if(sport==='football'){
-   headerT=.45;
+   const closeAirBall=!ballOwned&&Math.hypot(ball.position.x-px,ball.position.z-pz)<1.35&&ball.position.y>.55;
+   const fromJuggle=ballOwned&&juggleHeight>.20;
+   headerT=.58;
    notice('קפיצה לנגיחה! 🧠⚽');
    sayCommentary('¡Va de cabeza!','עולה לנגיחה!');
-   if(!ballOwned && Math.hypot(ball.position.x-px,ball.position.z-pz)<1.25 && ball.position.y>.65){
-     ball.position.y=1.65;ball.position.x=px;ball.position.z=pz-.15;bvx=(Math.random()-.5)*1.0;bvz=-13.5;
+   if(closeAirBall||fromJuggle){
+     headerContactPending=true;
+     ballOwned=false;
+     bvx=0;bvz=0;
    }
  }else{
    notice('קפיצה! 🏀');
@@ -474,16 +478,8 @@ if(e.code==='KeyG'&&presets[selectedLegend].sport==='football'){
  jumpT=.62;handT=.5;
  const closeAirBall=!ballOwned&&Math.hypot(ball.position.x-px,ball.position.z-pz)<1.55&&ball.position.y>.45;
  const fromJuggle=ballOwned&&juggleHeight>.22;
- if(fromJuggle){
-   ballOwned=false;
-   ball.position.set(px,1.75,pz-.12);
-   bvx=(Math.random()-.5)*.7;bvz=-13.8;
- }
- if(closeAirBall){
-   ball.position.y=1.75;ball.position.x=px;ball.position.z=pz-.12;bvx=(Math.random()-.5)*.7;bvz=-13.8;
- }
  if(closeAirBall||fromJuggle){
-   handGoalPending=true;handT=.72;jumpT=.82;
+   handGoalPending=true;handT=.82;jumpT=.88;
    ballOwned=false;bvx=0;bvz=0;
    notice('יד האלוהים! ✋⚽');
    sayCommentary('¡La mano de Dios!','יד האלוהים!');
@@ -590,21 +586,37 @@ function update(dt){
    const jt=1-jumpT/.8;
    const rise=Math.max(0,Math.sin(jt*Math.PI))*(dunkT>0?.75:.42);
    pelvis.position.y=.92+rise;
-   if(headerT>0){torso.rotation.x=-.35;head.rotation.x=-.45;armL.sh.rotation.z=-.45;armR.sh.rotation.z=.45;}
+   if(headerT>0){
+     torso.rotation.x=-.35;head.rotation.x=-.45;armL.sh.rotation.z=-.45;armR.sh.rotation.z=.45;
+     if(headerContactPending){
+       const hpHead=new T.Vector3();
+       head.getWorldPosition(hpHead);
+       const fx=Math.sin(player.rotation.y),fz=Math.cos(player.rotation.y);
+       if(headerT>.20){
+         // Keep the ball touching the forehead for a visible contact moment.
+         ball.position.set(hpHead.x+fx*.03,hpHead.y+.02,hpHead.z+fz*.17);
+         bvx=0;bvz=0;
+       }else{
+         headerContactPending=false;
+         bvx=fx*1.1+(Math.random()-.5)*.35;
+         bvz=fz*13.8;
+         ball.position.y=Math.max(ball.position.y,1.55);
+       }
+     }
+   }
    if(handT>0){
    armL.sh.rotation.z=-1.15;armL.sh.rotation.x=-.9;armL.el.rotation.x=-.35;
    if(handGoalPending){
      const hp=new T.Vector3();
      armL.hand.getWorldPosition(hp);
-     if(handT>.24){
-       // The ball is literally attached to the palm for a visible contact moment.
-       ball.position.copy(hp);
-       ball.position.y+=.02;
-       ball.position.z-=.06;
+     const fx=Math.sin(player.rotation.y),fz=Math.cos(player.rotation.y);
+     if(handT>.25){
+       // Exact palm contact before the ball is released.
+       ball.position.set(hp.x+fx*.02,hp.y+.015,hp.z+fz*.045);
        bvx=0;bvz=0;
-     }else if(bvz===0){
-       bvx=(Math.random()-.5)*.65;
-       bvz=-13.8;
+     }else if(bvx===0&&bvz===0){
+       bvx=fx*1.0+(Math.random()-.5)*.30;
+       bvz=fz*13.8;
        ball.position.y=Math.max(ball.position.y,1.55);
      }
    }
