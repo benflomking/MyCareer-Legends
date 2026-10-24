@@ -12,7 +12,7 @@
 #menu{position:fixed;inset:0;background:radial-gradient(circle at 25% 20%,#173753,#07111d 65%);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:25px;z-index:5}
 #menu h1{font-size:clamp(42px,8vw,82px);margin:0;letter-spacing:3px;direction:ltr}#menu h1 b{color:#f3cd68}#menu h2{margin:16px 0 4px;font-size:30px}#menu p{max-width:720px;color:#c7d6e4;line-height:1.6}
 button{border:0;border-radius:13px;background:#f3cd68;color:#101820;font-weight:900;font-size:18px;padding:13px 26px;cursor:pointer;margin:6px}button.secondary{background:#203a54;color:#fff;border:1px solid #ffffff22}
-#cards{display:grid;grid-template-columns:repeat(4,minmax(170px,1fr));gap:10px;width:min(980px,95vw);margin:18px 0}.legendCard{background:#ffffff0c;border:1px solid #ffffff20;border-radius:16px;padding:14px 16px;cursor:pointer}.legendCard.active{outline:2px solid #f3cd68;background:#ffffff16}.legendCard b{display:block;font-size:18px}.legendCard .n{font-size:34px;font-weight:900;color:#8bd2fa}.small{font-size:12px;color:#9db2c5}@media(max-width:800px){#cards{grid-template-columns:1fr 1fr}}
+#cards{display:grid;grid-template-columns:repeat(4,minmax(170px,1fr));gap:10px;width:min(980px,95vw);margin:18px 0}.legendCard{background:#ffffff0c;border:1px solid #ffffff20;border-radius:16px;padding:14px 16px;cursor:pointer}.legendCard.active{outline:3px solid #f3cd68;background:#ffffff24;transform:translateY(-2px)}.legendCard b{display:block;font-size:18px}.legendCard .n{font-size:34px;font-weight:900;color:#8bd2fa}.small{font-size:12px;color:#9db2c5}@media(max-width:800px){#cards{grid-template-columns:1fr 1fr}}
 #stamina{position:absolute;left:18px;bottom:18px;width:170px}.bar{height:7px;background:#ffffff22;border-radius:20px;overflow:hidden;margin-top:5px}.bar i{display:block;height:100%;width:100%;background:#f3cd68}
 [hidden]{display:none!important}
 </style>
@@ -30,6 +30,7 @@ button{border:0;border-radius:13px;background:#f3cd68;color:#101820;font-weight:
  </div>
  <p id="matchDesc">מראדונה • ארגנטינה נגד אנגליה</p>
  <div><button id="play">משחק</button><button id="training" class="secondary">מוד אימון</button><button id="career" class="secondary">קריירת אגדות</button></div>
+ <p class="small">אפשר להחליף שחקן בלחיצה על הכרטיס שלו למעלה.</p>
 </div>
 <div id="ui" hidden>
  <div id="top"><div class="title" id="playerTitle">MARADONA • 10</div><div class="small" id="matchTitle">ארגנטינה נגד אנגליה</div><div class="score"><span id="s1">0</span> : <span id="s2">0</span></div></div>
@@ -72,7 +73,7 @@ function sphere(sx,sy,sz,m,parent=player){const o=mesh(new T.SphereGeometry(1,20
 function limb(a,b,r,m,parent){const d=new T.Vector3().subVectors(b,a),o=mesh(new T.CylinderGeometry(r*.84,r,1,12),m,parent);o.position.copy(a).add(b).multiplyScalar(.5);o.scale.y=d.length();o.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),d.clone().normalize());return o}
 const pelvis=new T.Group();pelvis.name='pelvis';pelvis.position.y=.92;player.add(pelvis);
 const torso=new T.Group();torso.name='body';torso.position.y=.36;pelvis.add(torso);
-const chest=mesh(new T.CylinderGeometry(.32,.27,.55,20),sky,torso);chest.scale.x=1.18;
+const chest=mesh(new T.CylinderGeometry(.30,.25,.62,24),sky,torso);chest.scale.set(1.08,1,1.0);
 const stripeMat=white;
 // Argentina shirt stripes on both front (+Z) and back (-Z)
 for(const x of [-.20,0,.20]){
@@ -83,8 +84,8 @@ for(const x of [-.20,0,.20]){
 }
 const neck=sphere(.09,.11,.09,skin,torso);neck.position.y=.38;
 const head=new T.Group();head.name='head';head.position.y=.53;torso.add(head);
-sphere(.17,.21,.17,skin,head);
-const jaw=sphere(.135,.10,.145,skin,head);jaw.position.set(0,-.13,-.018);
+sphere(.165,.205,.16,skin,head);
+const jaw=sphere(.13,.095,.14,skin,head);jaw.position.set(0,-.13,-.018);
 const nose=sphere(.032,.044,.055,skin,head);nose.position.set(0,-.015,.17);
 for(const sx of [-1,1]){const e=sphere(.033,.018,.012,white,head);e.position.set(sx*.065,.045,.155);const iris=sphere(.011,.01,.008,black,head);iris.position.set(sx*.065,.045,.168);const brow=mesh(new T.BoxGeometry(.065,.012,.012),hair,head);brow.position.set(sx*.064,.083,.164);brow.rotation.z=sx*.08}
 const mouth=mesh(new T.BoxGeometry(.07,.012,.012),mat(0x6b322c,.7),head);mouth.position.set(0,-.08,.16);
@@ -102,15 +103,34 @@ for(let i=0;i<9;i++){
  const bang=sphere(.032+(i%3)*.006,.03,.031,hair,head);
  bang.position.set(-.105+i*.027,.105-(i%2)*.025,.145+Math.sin(i)*.018);
 }
-function arm(side){const sh=new T.Group();sh.name='shoulder'+side;sh.position.set(side==='L'?-.30:.30,.19,0,);torso.add(sh);const sleeve=mesh(new T.CylinderGeometry(.115,.12,.28,14),sky,sh);sleeve.rotation.z=Math.PI/2;
-if(side==='L'){
-  const captainBand=mesh(new T.CylinderGeometry(.128,.128,.075,18),mat(0x315a7d,.7),sh);
-  captainBand.rotation.z=Math.PI/2;
-  captainBand.position.set(-.03,-.01,0);
+function arm(side){
+ const dir=side==='L'?-1:1;
+ const sh=new T.Group();sh.name='shoulder'+side;sh.position.set(dir*.285,.19,0);torso.add(sh);
+
+ const sleeve=mesh(new T.CylinderGeometry(.12,.125,.30,18),sky,sh);
+ sleeve.rotation.z=Math.PI/2;
+ sleeve.position.x=dir*.07;
+
+ if(side==='L'){
+   const captainBand=mesh(new T.CylinderGeometry(.129,.129,.075,18),mat(0x315a7d,.7),sh);
+   captainBand.rotation.z=Math.PI/2;
+   captainBand.position.set(dir*.085,-.005,0);
+ }
+
+ const upper=new T.Group();upper.position.set(dir*.22,-.015,0);sh.add(upper);
+ limb(new T.Vector3(0,-.03,0),new T.Vector3(dir*.025,-.27,0),.058,skin,upper);
+
+ const el=new T.Group();el.name='elbow'+side;el.position.set(dir*.025,-.27,0);upper.add(el);
+ limb(new T.Vector3(0,0,0),new T.Vector3(dir*.02,-.27,-.005),.047,skin,el);
+
+ const hand=sphere(.058,.07,.048,skin,el);hand.position.set(dir*.02,-.30,-.005);
+ return {sh,el}
 }
-const upper=new T.Group();upper.position.set(side==='L'?-.16:.16,-.01,0);sh.add(upper);limb(new T.Vector3(side==='L'?-.02:.02,-.02,0),new T.Vector3(side==='L'?-.055:.055,-.27,0),.062,skin,upper);const el=new T.Group();el.name='elbow'+side;el.position.set(side==='L'?-.05:.05,-.27,0);upper.add(el);limb(new T.Vector3(0,0,0),new T.Vector3(side==='L'?-.02:.02,-.27,-.01),.05,skin,el);const hand=sphere(.06,.075,.05,skin,el);hand.position.set(side==='L'?-.02:.02,-.30,-.01);return {sh,el}}
 const armL=arm('L'),armR=arm('R');
-function leg(side){const hip=new T.Group();hip.name='hip'+side;hip.position.set(side==='L'?-.13:.13,-.05,0);pelvis.add(hip);const short=mesh(new T.CylinderGeometry(.14,.13,.25,14),shorts,hip);short.position.y=-.13;limb(new T.Vector3(0,-.22,0),new T.Vector3(0,-.52,0),.09,skin,hip);const knee=new T.Group();knee.name='knee'+side;knee.position.y=-.52;hip.add(knee);sphere(.075,.07,.075,skin,knee);limb(new T.Vector3(0,-.04,0),new T.Vector3(0,-.39,.01),.065,skin,knee);const sk=mesh(new T.CylinderGeometry(.065,.06,.19,12),sock,knee);sk.position.y=-.39;const foot=new T.Group();foot.name='foot'+side;foot.position.set(0,-.50,-.05);knee.add(foot);const shoe=mesh(new T.BoxGeometry(.15,.09,.30),black,foot);shoe.position.z=.10;shoe.rotation.x=.08;return {hip,knee,foot}}
+function leg(side){const hip=new T.Group();hip.name='hip'+side;hip.position.set(side==='L'?-.13:.13,-.05,0);pelvis.add(hip);const short=mesh(new T.CylinderGeometry(.14,.13,.25,14),shorts,hip);short.position.y=-.13;limb(new T.Vector3(0,-.22,0),new T.Vector3(0,-.52,0),.09,skin,hip);const knee=new T.Group();knee.name='knee'+side;knee.position.y=-.52;hip.add(knee);sphere(.075,.07,.075,skin,knee);limb(new T.Vector3(0,-.04,0),new T.Vector3(0,-.39,.01),.065,skin,knee);const sk=mesh(new T.CylinderGeometry(.065,.06,.19,12),sock,knee);sk.position.y=-.39;const foot=new T.Group();foot.name='foot'+side;foot.position.set(0,-.50,-.05);knee.add(foot);const shoe=mesh(new T.BoxGeometry(.16,.085,.34),black,foot);
+shoe.position.z=.13;
+shoe.rotation.x=-.10;
+shoe.scale.set(1,1,.95);return {hip,knee,foot}}
 const legL=leg('L'),legR=leg('R');
 const ten=document.createElement('canvas');ten.width=256;ten.height=256;const tc=ten.getContext('2d');tc.clearRect(0,0,256,256);tc.font='bold 176px Arial';tc.textAlign='center';tc.textBaseline='middle';tc.lineWidth=16;tc.strokeStyle='#111111';tc.strokeText('10',128,135);tc.fillStyle='#111111';tc.fillText('10',128,135);const ttex=new T.CanvasTexture(ten);ttex.needsUpdate=true;
 const numBack=mesh(new T.PlaneGeometry(.42,.42),new T.MeshBasicMaterial({map:ttex,transparent:true,side:T.DoubleSide,depthWrite:false}),torso);
@@ -134,7 +154,9 @@ document.querySelectorAll('.legendCard').forEach(card=>card.onclick=()=>{
  selectedLegend=card.dataset.legend;
  document.querySelectorAll('.legendCard').forEach(c=>c.classList.toggle('active',c===card));
  $('matchDesc').textContent=presets[selectedLegend].desc;
+ applyLegend();
 });
+applyLegend();
 function start(c,isTraining=false){career=c;training=isTraining;active=true;$('menu').hidden=true;$('ui').hidden=false;px=0;pz=8;score=0;stamina=100;player.rotation.y=Math.PI;zoom=!!c;applyLegend();$('cam').textContent=zoom?'מצלמה: קריירה':'מצלמה: משחק';
  if(training){notice('מוד אימון — בלי לחץ, תתאמן על דריבל ובעיטות');}
  else if(c){notice('קריירת אגדות — המצלמה על השחקן');}
@@ -162,12 +184,12 @@ function update(dt){
    const jump=Math.max(0,Math.sin(ct*6.2))*.22;
    pelvis.position.y=.92+jump;
    // realistic celebration: arms up and out, elbows bent, no shoulder clipping
-   armL.sh.rotation.z=-.92;
-   armR.sh.rotation.z=.92;
-   armL.sh.rotation.x=-.42;
-   armR.sh.rotation.x=-.42;
-   armL.el.rotation.x=-1.15;
-   armR.el.rotation.x=-1.15;
+   armL.sh.rotation.z=-.72;
+   armR.sh.rotation.z=.72;
+   armL.sh.rotation.x=-.70;
+   armR.sh.rotation.x=-.70;
+   armL.el.rotation.x=-1.35;
+   armR.el.rotation.x=-1.35;
    torso.rotation.x=-.08;
    torso.rotation.z=Math.sin(ct*5.5)*.07;
    head.rotation.y=Math.sin(ct*3.2)*.16;
