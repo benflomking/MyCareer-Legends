@@ -45,13 +45,13 @@ button{border:0;border-radius:13px;background:#f3cd68;color:#101820;font-weight:
  <div id="msg"></div>
  <div id="juggleText" style="position:absolute;top:130px;left:50%;transform:translateX(-50%);font-size:22px;font-weight:900;color:#fff;text-shadow:0 2px 7px #000"></div>
  <div id="commentary" style="position:absolute;bottom:58px;left:50%;transform:translateX(-50%);background:#07111ddd;border-radius:10px;padding:7px 12px;font-size:14px;max-width:70vw;text-align:center"></div>
- <div id="help">WASD / חיצים • Shift ספרינט • F הטעיה • J הקפצה • Q נגיחה • J ואז G = יד האלוהים • C קרן • P פנדל • B הטבעה • Space בעיטה • V זום</div>
+ <div id="help">WASD / חיצים • Shift ספרינט • E מסירה • F הטעיה • J הקפצה • Q נגיחה • J ואז G = יד האלוהים • C קרן • P פנדל • B הטבעה • Space בעיטה • V זום</div>
  <div id="stamina">סיבולת<div class="bar"><i id="st"></i></div></div>
 </div>
 <script type="module">
 import * as T from 'three';
 const $=id=>document.getElementById(id);
-let active=false,career=false,training=false,selectedLegend='maradona',keys=new Set(),zoom=false,score=0,msgT=0,commentT=0,fakeT=0,kickT=0,celebrateT=0,jumpT=0,headerT=0,handT=0,dunkT=0,juggleT=0,juggleQueue=0,juggleCount=0,juggleHeight=0,juggleVel=0,cornerMode=false,penaltyMode=false,handGoalPending=false,stamina=100;
+let active=false,career=false,training=false,selectedLegend='maradona',keys=new Set(),zoom=false,score=0,msgT=0,commentT=0,fakeT=0,kickT=0,celebrateT=0,jumpT=0,headerT=0,handT=0,dunkT=0,juggleT=0,juggleQueue=0,juggleCount=0,juggleHeight=0,juggleVel=0,cornerMode=false,penaltyMode=false,handGoalPending=false,passT=0,passTarget=null,stamina=100;
 const presets={
  maradona:{name:'MARADONA',num:10,match:'ארגנטינה נגד אנגליה',desc:'מראדונה • ארגנטינה נגד אנגליה',shirt:0x84cef5,shorts:0x171d28,sport:'football'},
  pele:{name:'PELÉ',num:10,match:'ברזיל נגד אורוגוואי',desc:'פלה • ברזיל נגד אורוגוואי',shirt:0xf3db32,shorts:0x2456a6,sport:'football'},
@@ -100,6 +100,25 @@ const kArmL=new T.Mesh(new T.CylinderGeometry(.055,.065,.72,10),mat(0x244f9c,.7)
 const kArmR=kArmL.clone();kArmR.position.x=.38;keeper.add(kArmR);
 keeper.position.set(0,0,-22.2);
 const keeper2=keeper.clone();keeper2.position.set(0,0,22.2);keeper2.rotation.y=Math.PI;opponentsGroup.add(keeper2);
+
+// Extra teammates for Career mode.
+const teammatesGroup=new T.Group();scene.add(teammatesGroup);teammatesGroup.visible=false;
+function makeTeammate(x,z,color=0x84cef5){
+ const g=new T.Group();
+ const body=new T.Mesh(new T.CylinderGeometry(.22,.19,.56,16),mat(color,.8));body.position.y=1.15;body.castShadow=true;g.add(body);
+ const h=new T.Mesh(new T.SphereGeometry(.16,16,12),skin);h.position.y=1.54;h.castShadow=true;g.add(h);
+ const l1=new T.Mesh(new T.CylinderGeometry(.05,.055,.60,10),skin);l1.position.set(-.08,.61,0);g.add(l1);
+ const l2=l1.clone();l2.position.x=.08;g.add(l2);
+ g.position.set(x,0,z);teammatesGroup.add(g);return g;
+}
+const teammates=[
+ makeTeammate(-4.5,4),
+ makeTeammate(4.2,2),
+ makeTeammate(-5.8,-3),
+ makeTeammate(5.4,-6),
+ makeTeammate(-2.8,-10),
+ makeTeammate(2.9,-13)
+];
 
 // Basketball setup for Jordan/Kobe.
 const basketballGroup=new T.Group();scene.add(basketballGroup);
@@ -208,7 +227,7 @@ function applyLegend(){
  $('matchTitle').textContent=training?'אימון חופשי':p.match;
  $('matchDesc').textContent=p.desc;
  // Argentina stripes only for Maradona; keep the others cleaner.
- torso.children.forEach(o=>{if(o.material===stripeMat)o.visible=selectedLegend==='maradona'});opponentsGroup.visible=p.sport==='football';basketballGroup.visible=p.sport==='basketball';field.visible=p.sport==='football';ball.material.color.setHex(p.sport==='basketball'?0xd86f16:0xf6f2e7);
+ torso.children.forEach(o=>{if(o.material===stripeMat)o.visible=selectedLegend==='maradona'});opponentsGroup.visible=p.sport==='football';basketballGroup.visible=p.sport==='basketball';field.visible=p.sport==='football';teammatesGroup.visible=career&&p.sport==='football';teammates.forEach(t=>t.children[0].material.color.setHex(p.shirt));ball.material.color.setHex(p.sport==='basketball'?0xd86f16:0xf6f2e7);
 }
 document.querySelectorAll('.legendCard').forEach(card=>card.onclick=()=>{
  selectedLegend=card.dataset.legend;
@@ -224,15 +243,29 @@ function showLineup(){
    '<div><b>'+p.name+'</b><ol>'+l.home.map(v=>'<li>'+v+'</li>').join('')+'</ol></div>'+
    '<div><b>'+awayName+'</b><ol>'+l.away.map(v=>'<li>'+v+'</li>').join('')+'</ol></div>';
  $('lineup').hidden=false;
+ try{
+   if('speechSynthesis' in window){
+     speechSynthesis.cancel();
+     const home=l.home.join(', ');
+     const away=l.away.join(', ');
+     const es='¡Atención, atención! ¡Ya tenemos las alineaciones! '+p.name+': '+home+'. Y enfrente, '+awayName+': '+away+'. ¡Qué partidazo se viene!';
+     const u=new SpeechSynthesisUtterance(es);u.lang='es-ES';u.rate=.96;u.pitch=1.02;
+     const voices=speechSynthesis.getVoices();
+     const spanish=voices.find(v=>/^es(-|_)/i.test(v.lang))||voices.find(v=>/Spanish|Español/i.test(v.name));
+     if(spanish)u.voice=spanish;
+     speechSynthesis.speak(u);
+     $('commentary').textContent='השדרן מקריא בהתלהבות את ההרכבים';
+   }
+ }catch(e){}
 }
 $('lineupStart').onclick=()=>{try{if('speechSynthesis' in window)speechSynthesis.getVoices();}catch(e){};
  $('lineup').hidden=true;
  active=true;
  $('ui').hidden=false;
  notice(presets[selectedLegend].match);
- sayCommentary('¡Comienza el partido!','המשחק יוצא לדרך!');
+ sayCommentary('¡Arranca el partidazo! ¡Vamos, vamos, vamos!','המשחק הגדול יוצא לדרך!');
 };
-function start(c,isTraining=false){career=c;training=isTraining;active=false;$('menu').hidden=true;$('ui').hidden=true;px=0;pz=8;score=0;stamina=100;juggleT=0;juggleQueue=0;juggleCount=0;juggleHeight=0;juggleVel=0;jumpT=0;headerT=0;handT=0;dunkT=0;cornerMode=false;penaltyMode=false;handGoalPending=false;$('juggleText').textContent='';$('commentary').textContent='';player.rotation.y=Math.PI;defenders[0].position.set(-2.8,0,-4);defenders[1].position.set(2.5,0,-7);defenders[2].position.set(-1.2,0,-11);defenders[3].position.set(1.5,0,-15);keeper.position.set(0,0,-22.2);keeper2.position.set(0,0,22.2);zoom=!!c;applyLegend();$('cam').textContent=zoom?'מצלמה: קריירה':'מצלמה: משחק';
+function start(c,isTraining=false){career=c;training=isTraining;active=false;$('menu').hidden=true;$('ui').hidden=true;px=0;pz=8;score=0;stamina=100;juggleT=0;juggleQueue=0;juggleCount=0;juggleHeight=0;juggleVel=0;jumpT=0;headerT=0;handT=0;dunkT=0;cornerMode=false;penaltyMode=false;handGoalPending=false;passT=0;passTarget=null;$('juggleText').textContent='';$('commentary').textContent='';player.rotation.y=Math.PI;defenders[0].position.set(-2.8,0,-4);defenders[1].position.set(2.5,0,-7);defenders[2].position.set(-1.2,0,-11);defenders[3].position.set(1.5,0,-15);keeper.position.set(0,0,-22.2);keeper2.position.set(0,0,22.2);teammates[0].position.set(-4.5,0,4);teammates[1].position.set(4.2,0,2);teammates[2].position.set(-5.8,0,-3);teammates[3].position.set(5.4,0,-6);teammates[4].position.set(-2.8,0,-10);teammates[5].position.set(2.9,0,-13);zoom=!!c;applyLegend();$('cam').textContent=zoom?'מצלמה: קריירה':'מצלמה: משחק';
  if(training){notice('מוד אימון — דריבל, בעיטות והקפצות עם J');}
  else if(c){notice('קריירת אגדות — המצלמה על השחקן');}
  else{notice(presets[selectedLegend].match);} showLineup();
@@ -240,7 +273,14 @@ function start(c,isTraining=false){career=c;training=isTraining;active=false;$('
 $('play').onclick=()=>start(false,false);
 $('training').onclick=()=>start(false,true);
 $('career').onclick=()=>start(true,false);
-addEventListener('keydown',e=>{if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();keys.add(e.code);if(!active)return;if(e.code==='Escape'){active=false;$('menu').hidden=false;$('ui').hidden=true}if(e.code==='KeyV'){zoom=!zoom;$('cam').textContent=zoom?'מצלמה: קריירה':'מצלמה: משחק';notice(zoom?'זום על מראדונה':'מצלמת משחק')}if(e.code==='KeyF'&&fakeT<=0){fakeT=.55;notice('בעיטת הטעיה 😈')}if(e.code==='KeyJ'&&presets[selectedLegend].sport==='football'){
+addEventListener('keydown',e=>{if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();keys.add(e.code);if(!active)return;if(e.code==='Escape'){active=false;$('menu').hidden=false;$('ui').hidden=true}if(e.code==='KeyV'){zoom=!zoom;$('cam').textContent=zoom?'מצלמה: קריירה':'מצלמה: משחק';notice(zoom?'זום על מראדונה':'מצלמת משחק')}
+if(e.code==='KeyE'&&career&&presets[selectedLegend].sport==='football'&&ballOwned){
+ let best=teammates[0],bestD=Infinity;
+ for(const t of teammates){const d=Math.hypot(t.position.x-px,t.position.z-pz);if(d<bestD&&d>1.0){best=t;bestD=d}}
+ passTarget=best;passT=.7;ballOwned=false;
+ notice('מסירה לחבר קבוצה! ⚽');sayCommentary('¡Qué pase!','מסירה נהדרת!');
+}
+if(e.code==='KeyF'&&fakeT<=0){fakeT=.55;notice('בעיטת הטעיה 😈')}if(e.code==='KeyJ'&&presets[selectedLegend].sport==='football'){
   juggleQueue=Math.min(20,juggleQueue+1);
   if(juggleT<=0){
     juggleQueue=Math.max(0,juggleQueue-1);
@@ -289,7 +329,8 @@ if(e.code==='KeyG'&&presets[selectedLegend].sport==='football'){
    ball.position.y=1.75;ball.position.x=px;ball.position.z=pz-.12;bvx=(Math.random()-.5)*.7;bvz=-13.8;
  }
  if(closeAirBall||fromJuggle){
-   handGoalPending=true;
+   handGoalPending=true;handT=.62;jumpT=.72;
+   ballOwned=false;ball.position.set(px-.40,1.85,pz-.05);bvx=0;bvz=-13.8;
    notice('יד האלוהים! ✋⚽');
    sayCommentary('¡La mano de Dios!','יד האלוהים!');
  }else{
@@ -311,7 +352,7 @@ function update(dt){
  if(!active)return;
  msgT-=dt;if(msgT<=0)$('msg').textContent='';
  commentT-=dt;if(commentT<=0)$('commentary').textContent='';
- fakeT=Math.max(0,fakeT-dt);kickT=Math.max(0,kickT-dt);celebrateT=Math.max(0,celebrateT-dt);jumpT=Math.max(0,jumpT-dt);headerT=Math.max(0,headerT-dt);handT=Math.max(0,handT-dt);dunkT=Math.max(0,dunkT-dt);
+ fakeT=Math.max(0,fakeT-dt);kickT=Math.max(0,kickT-dt);celebrateT=Math.max(0,celebrateT-dt);jumpT=Math.max(0,jumpT-dt);headerT=Math.max(0,headerT-dt);handT=Math.max(0,handT-dt);dunkT=Math.max(0,dunkT-dt);passT=Math.max(0,passT-dt);
  if(juggleT>0){
    juggleT-=dt;
    juggleVel-=9.2*dt;
@@ -369,6 +410,14 @@ function update(dt){
    head.rotation.y*=Math.exp(-dt*8);
  }
  player.position.set(px,0,pz);
+ if(career&&presets[selectedLegend].sport==='football'){
+   teammates.forEach((t,i)=>{
+     const tx=px+[-4.4,4.1,-6.0,5.8,-3.2,3.2][i];
+     const tz=pz+[-2,-4,-7,-9,-12,-14][i];
+     t.position.x=T.MathUtils.lerp(t.position.x,T.MathUtils.clamp(tx,-13,13),1-Math.exp(-dt*.7));
+     t.position.z=T.MathUtils.lerp(t.position.z,T.MathUtils.clamp(tz,-21,21),1-Math.exp(-dt*.7));
+   });
+ }
  if(presets[selectedLegend].sport==='football'&&!training){
    defenders.forEach((d,i)=>{
      const dxp=px-d.position.x,dzp=pz-d.position.z,dist=Math.hypot(dxp,dzp)||1;
@@ -406,11 +455,25 @@ function update(dt){
        }
      }
    }
- }else{ball.position.x+=bvx*dt;ball.position.z+=bvz*dt;ball.position.y=Math.max(.13,ball.position.y+(ball.position.y>.14?1.8*dt:0)-3.6*dt*dt);bvx*=.995;bvz*=.995;ball.rotation.x+=dt*10;
+ }else{
+   if(passTarget&&passT>0){
+     const tx=passTarget.position.x,tz=passTarget.position.z;
+     ball.position.x=T.MathUtils.lerp(ball.position.x,tx,1-Math.exp(-dt*8));
+     ball.position.z=T.MathUtils.lerp(ball.position.z,tz,1-Math.exp(-dt*8));
+     ball.position.y=.16;
+     if(Math.hypot(ball.position.x-tx,ball.position.z-tz)<.28||passT<=.05){
+       // teammate receives, then immediately returns control to your legend instead of losing control
+       passTarget=null;passT=0;ballOwned=true;
+       ball.position.set(px+.2,.13,pz-.3);
+       notice('הכדור חזר אליך');sayCommentary('¡Devuelve la pelota!','הכדור חוזר אליך!');
+     }
+   }else{
+   ball.position.x+=bvx*dt;ball.position.z+=bvz*dt;ball.position.y=Math.max(.13,ball.position.y+(ball.position.y>.14?1.8*dt:0)-3.6*dt*dt);bvx*=.995;bvz*=.995;ball.rotation.x+=dt*10;
    if(presets[selectedLegend].sport==='football'&&!training&&ball.position.z<-21.55&&ball.position.z>-22.8&&Math.abs(ball.position.x-keeper.position.x)<.72&&ball.position.y<1.45){
      ball.position.y=.55;bvz=Math.abs(bvz)*.55;bvx+=(ball.position.x-keeper.position.x)*2.5;notice('השוער הציל! 🧤');sayCommentary('¡Atajadón!','איזו הצלה של השוער!');
    }
-   if(ball.position.z<-23.2){if(Math.abs(ball.position.x)<3){score++;$('s1').textContent=score;if(!training)celebrateT=2.6;if(handGoalPending){notice('גול יד האלוהים! ✋⚽');sayCommentary('¡La mano de Dios! ¡Gol!','יד האלוהים נחשבת — שער!');handGoalPending=false;}else{notice(training?'פגיעה טובה! המשך להתאמן ⚽':'גווווול! חגיגה! 🔥');sayCommentary(training?'¡Buen toque!':'¡Gooooool!','שער! איזה ביצוע!')}}else{handGoalPending=false;notice('כמעט!')}setTimeout(()=>{ballOwned=true;ball.position.set(px,.13,pz-.4)},450)}if(Math.hypot(ball.position.x-px,ball.position.z-pz)<.5)ballOwned=true}
+   if(ball.position.z<-23.2){if(Math.abs(ball.position.x)<3){score++;$('s1').textContent=score;if(!training)celebrateT=2.6;if(handGoalPending){notice('גול יד האלוהים! ✋⚽');sayCommentary('¡GOOOOOOL! ¡LA MANO DE DIOS! ¡INCREÍBLE, INCREÍBLE!','יד האלוהים! שער מטורף!');handGoalPending=false;}else{notice(training?'פגיעה טובה! המשך להתאמן ⚽':'גווווול! חגיגה! 🔥');sayCommentary(training?'¡Buen toque!':'¡GOOOOOOOOOOL! ¡Qué locura, qué golazo!','גווווול! איזה שער ענק!')}}else{handGoalPending=false;notice('כמעט!')}setTimeout(()=>{ballOwned=true;ball.position.set(px,.13,pz-.4)},450)}if(Math.hypot(ball.position.x-px,ball.position.z-pz)<.5)ballOwned=true}
+   }
  const target=zoom
  ? new T.Vector3(px+Math.cos(player.rotation.y)*3.1,1.85,pz-Math.sin(player.rotation.y)*3.1)
  : new T.Vector3(px,presets[selectedLegend].sport==='basketball'?6.8:8.2,pz+(presets[selectedLegend].sport==='basketball'?8.8:11.5));
