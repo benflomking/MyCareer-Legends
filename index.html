@@ -1,1 +1,120 @@
-<!doctype html><html lang="he" dir="rtl"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><title>MyCareer Legends</title><link rel="stylesheet" href="style.css"><script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script><body><canvas id="game"></canvas><div id="hud" hidden><div class="score"><span id="teams"></span><b id="score">0 : 0</b><span id="time"></span></div><button id="pause">⏸ השהיה</button><div id="hint"></div><div id="toast" role="status"></div><div id="stamina"><span>סיבולת</span><div><i id="staminafill"></i></div></div><div id="shotmeter" hidden><span>שחרר באזור הירוק</span><div class="meter"><div class="sweet"></div><i id="shotfill"></i></div></div></div><main id="menu"><div class="brand">MYCAREER <strong>LEGENDS</strong></div><p class="eyebrow">הדרך שלך לאגדה</p><h1>המגרש מחכה לך.</h1><p>בחר אגדה. עלה למגרש. בנה קריירה.</p><div id="cards"></div><div id="career"></div><div class="actions"><button id="quick" class="primary">משחק מהיר</button><button id="season">המשך עונה</button><select id="quality" aria-label="איכות גרפיקה"><option value="low">גרפיקה נמוכה • מומלץ למק 2015</option><option value="high">גרפיקה רגילה</option></select></div><details open><summary>איך משחקים?</summary><p>תנועה: W A S D או חיצים • ריצה מהירה: Shift • מסירה: E • זריקה / בעיטה: החזק רווח ושחרר • חטיפה: Q • השהיה: Esc • החלפת מצלמה: C</p><p>תוקפים קדימה, אל הסל או השער שבקצה המסך. החזק רווח ושחרר כשהמד מגיע לאזור הירוק. הזריקה מכוונת אוטומטית לסל / לשער; התקרב כדי לשפר את הסיכוי. אתה שולט רק באגדה שבחרת. שאר השחקנים נשלטים בידי המחשב. E מוסר כשהכדור אצלך, או מבקש מסירה מחבר קבוצה. בטלפון השתמש בכפתורי המסך.</p></details><small>משחק מחווה עצמאי • דמויות מסוגננות • ללא קשר רשמי לקבוצות או לשחקנים</small></main><section id="overlay" hidden></section><div id="touch" hidden><div class="pad"><button data-key="ArrowUp">▲</button><div><button data-key="ArrowLeft">◀</button><button data-key="ArrowDown">▼</button><button data-key="ArrowRight">▶</button></div></div><div class="touch-actions"><button data-key="Space">זריקה / בעיטה</button><button data-key="KeyE">מסירה</button><button data-key="KeyQ">חטיפה</button><button data-key="ShiftLeft">ריצה</button></div></div><script type="module" src="game.js"></script></body></html>
+<!doctype html>
+<html lang="he" dir="rtl">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>MyCareer Legends</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#07111c;color:#fff;font-family:Arial,sans-serif;overflow:hidden}button,select{font:inherit}
+#game{position:fixed;inset:0;width:100%;height:100%;background:#123}
+#menu{position:fixed;inset:0;padding:34px 5vw;background:linear-gradient(120deg,#07111cf5,#10253aee);overflow:auto}
+.brand{letter-spacing:4px;direction:ltr}.brand b{color:#f5c85d}.eyebrow{color:#f5c85d;margin-top:24px}
+h1{font-size:46px;margin:8px 0 14px}p{color:#bfd0df;line-height:1.6}
+#cards{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:12px;margin:24px 0}
+.card{border:1px solid #ffffff24;border-top:4px solid var(--c);background:#16283a;color:#fff;border-radius:14px;padding:18px;text-align:right;cursor:pointer;min-height:135px}
+.card.sel{outline:2px solid #f5c85d}.num{float:left;font-size:40px;color:var(--c);font-weight:900}.card b{display:block;font-size:23px}.card small{display:block;margin-top:12px;color:#9fb2c5}
+.actions{display:flex;gap:10px;flex-wrap:wrap}.actions button{padding:12px 22px;border-radius:12px;border:1px solid #ffffff2a;background:#1e344a;color:#fff;cursor:pointer}.actions .primary{background:#f5c85d;color:#111;font-weight:bold}
+#hud{position:fixed;inset:14px 18px auto;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none}
+#hud>*{pointer-events:auto}.score{background:#07111ce8;padding:10px 18px;border-radius:12px;border-bottom:2px solid #f5c85d;text-align:center;min-width:190px}.score b{font-size:27px;display:block;direction:ltr}
+#help{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#07111ccc;padding:10px 16px;border-radius:12px;font-size:13px;text-align:center}
+#toast{position:fixed;top:80px;left:50%;transform:translateX(-50%);font-size:22px;font-weight:bold;color:#ffe39b;text-shadow:0 2px 5px #000}
+#zoomBadge{position:fixed;left:18px;bottom:18px;background:#07111ccc;padding:8px 12px;border-radius:10px;font-size:12px}
+[hidden]{display:none!important}
+@media(max-width:760px){#cards{grid-template-columns:1fr 1fr}h1{font-size:34px}.card{min-height:112px;padding:12px}.card b{font-size:19px}}
+</style>
+<canvas id="game"></canvas>
+
+<main id="menu">
+  <div class="brand">MYCAREER <b>LEGENDS</b></div>
+  <div class="eyebrow">הדרך שלך לאגדה</div>
+  <h1>המגרש מחכה לך.</h1>
+  <p>בחר אגדה. עלה למגרש. בנה קריירה.</p>
+  <div id="cards"></div>
+  <div class="actions">
+    <button id="quick" class="primary">משחק מהיר</button>
+    <button id="career">קריירת אגדות</button>
+  </div>
+  <p>מקשים: W A S D / חיצים • Shift ספרינט • F בעיטת הטעיה • Space בעיטה • V זום על השחקן • Esc חזרה</p>
+</main>
+
+<div id="hud" hidden>
+  <button id="back">חזרה</button>
+  <div class="score"><span id="teams"></span><b id="score">0 : 0</b><span id="time">90</span></div>
+</div>
+<div id="toast"></div>
+<div id="help" hidden>WASD / חיצים • Shift ספרינט • F הטעיה • Space בעיטה • V זום</div>
+<div id="zoomBadge" hidden>מצלמה: רגילה</div>
+
+<script>
+const $=id=>document.getElementById(id), c=$('game'),x=c.getContext('2d');
+const legends={
+ maradona:{name:'דייגו מראדונה',num:10,color:'#80c8ee',team:'ארגנטינה',opp:'אנגליה',sport:'football'},
+ pele:{name:'פלה',num:10,color:'#f0d438',team:'ברזיל',opp:'אורוגוואי',sport:'football'},
+ kobe:{name:'קובי בראיינט',num:8,color:'#e5b52c',team:'לייקרס',opp:'פילדלפיה',sport:'basketball'},
+ jordan:{name:'מייקל ג׳ורדן',num:23,color:'#d52c3d',team:'שיקגו',opp:'יוטה',sport:'basketball'}
+};
+let sel='maradona',active=false,career=false,zoom=false,keys=new Set(),score=[0,0],time=90,last=performance.now(),fake=0,shotCD=0,toastT=0;
+let p={x:.5,y:.68,vx:0,vy:0,dir:-1,stamina:100}, ball={x:.5,y:.62,vx:0,vy:0,owned:true}, defenders=[];
+function menu(){
+ $('cards').innerHTML=Object.entries(legends).map(([id,a])=>`<button class="card ${id===sel?'sel':''}" style="--c:${a.color}" data-id="${id}"><span class="num">${a.num}</span><b>${a.name}</b><small>${a.team} מול ${a.opp}</small></button>`).join('');
+ document.querySelectorAll('.card').forEach(b=>b.onclick=()=>{sel=b.dataset.id;menu()});
+}
+function resize(){c.width=innerWidth*devicePixelRatio;c.height=innerHeight*devicePixelRatio;x.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0)}
+addEventListener('resize',resize);resize();menu();
+
+function reset(){
+ p={x:.5,y:.72,vx:0,vy:0,dir:-1,stamina:100}; ball={x:.5,y:.65,vx:0,vy:0,owned:true};
+ score=[0,0];time=career?120:90;fake=0;shotCD=0;
+ defenders=Array.from({length:5},(_,i)=>({x:.16+i*.17,y:.34+(i%2)*.12,phase:i}));
+}
+function start(isCareer){career=isCareer;active=true;zoom=false;reset();$('menu').hidden=true;$('hud').hidden=false;$('help').hidden=false;$('zoomBadge').hidden=false;$('teams').textContent=legends[sel].team+' — '+legends[sel].opp;notice('יאללה! תעשה דריבל ותתקוף')}
+function notice(t){$('toast').textContent=t;toastT=1.7}
+$('quick').onclick=()=>start(false);$('career').onclick=()=>start(true);$('back').onclick=stop;
+function stop(){active=false;$('menu').hidden=false;$('hud').hidden=true;$('help').hidden=true;$('zoomBadge').hidden=true;$('toast').textContent='';keys.clear()}
+addEventListener('keydown',e=>{if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();keys.add(e.code);if(!active)return;if(e.code==='Escape')stop();if(e.code==='KeyV'){zoom=!zoom;$('zoomBadge').textContent='מצלמה: '+(zoom?'זום שחקן':'רגילה');notice(zoom?'זום על השחקן':'מצלמה רגילה')}if(e.code==='KeyF'&&fake<=0){fake=.55;notice('בעיטת הטעיה! 😈')}if(e.code==='Space'&&shotCD<=0)shoot()});
+addEventListener('keyup',e=>keys.delete(e.code));
+
+function shoot(){
+ if(!ball.owned)return;shotCD=.45;ball.owned=false;
+ const targetX=.5+(Math.random()-.5)*.16,targetY=.04;
+ let dx=targetX-p.x,dy=targetY-p.y,n=Math.hypot(dx,dy)||1,speed=.92;
+ ball.vx=dx/n*speed;ball.vy=dy/n*speed;notice('בעיטה! ⚽');
+}
+function update(dt){
+ if(!active)return;
+ time=Math.max(0,time-dt);shotCD=Math.max(0,shotCD-dt);fake=Math.max(0,fake-dt);toastT=Math.max(0,toastT-dt);if(!toastT)$('toast').textContent='';
+ let dx=(keys.has('KeyD')||keys.has('ArrowRight')?1:0)-(keys.has('KeyA')||keys.has('ArrowLeft')?1:0);
+ let dy=(keys.has('KeyS')||keys.has('ArrowDown')?1:0)-(keys.has('KeyW')||keys.has('ArrowUp')?1:0);
+ let n=Math.hypot(dx,dy)||1,sprint=keys.has('ShiftLeft')&&p.stamina>1,spd=sprint?.42:.28;
+ p.stamina=Math.max(0,Math.min(100,p.stamina+(sprint?-28:18)*dt));
+ p.x=Math.max(.04,Math.min(.96,p.x+dx/n*spd*dt));p.y=Math.max(.12,Math.min(.92,p.y+dy/n*spd*dt));if(dy) p.dir=Math.sign(dy);
+ defenders.forEach((d,i)=>{let tx=p.x+(i-2)*.035,ty=p.y-.18-(i%2)*.045;d.x+=(tx-d.x)*dt*(.55+i*.07);d.y+=(ty-d.y)*dt*(.55+i*.06)});
+ if(ball.owned){let sway=Math.sin(performance.now()/90)*.018;ball.x=p.x+sway;ball.y=p.y-.055}else{ball.x+=ball.vx*dt;ball.y+=ball.vy*dt;ball.vx*=.996;ball.vy*=.996;if(ball.y<.045){if(Math.abs(ball.x-.5)<.14){score[0]++;notice('גווווול! 🔥');setTimeout(()=>{if(active){p.x=.5;p.y=.72;ball.owned=true}},500)}else{notice('החטאה');setTimeout(()=>{if(active)ball.owned=true},350)}ball.vx=ball.vy=0}if(Math.hypot(ball.x-p.x,ball.y-p.y)<.06){ball.owned=true;notice('הכדור חזר אליך')}}
+ if(time<=0){notice(score[0]>score[1]?'ניצחון!':'סיום המשחק');setTimeout(stop,1200)}
+ $('score').textContent=score[0]+' : '+score[1];$('time').textContent=Math.ceil(time)+' שנ׳';
+}
+function playerDraw(px,py,s){
+ const a=legends[sel],kick=fake>0?Math.sin((.55-fake)/.55*Math.PI)*.8:0;
+ x.save();x.translate(px,py);x.scale(s,s);
+ x.fillStyle='#1c1c1c';x.beginPath();x.ellipse(0,-37,11,8,0,Math.PI,Math.PI*2);x.fill();
+ x.fillStyle='#a86f4b';x.beginPath();x.arc(0,-32,9,0,Math.PI*2);x.fill();
+ x.fillStyle=a.color;x.fillRect(-10,-24,20,24);x.fillStyle='#111';x.font='bold 10px Arial';x.textAlign='center';x.fillText(a.num,0,-8);
+ x.strokeStyle='#a86f4b';x.lineWidth=5;x.lineCap='round';x.beginPath();x.moveTo(-7,-20);x.lineTo(-14,-7);x.moveTo(7,-20);x.lineTo(14,-7);x.stroke();
+ x.strokeStyle='#a86f4b';x.lineWidth=6;x.beginPath();x.moveTo(-5,0);x.lineTo(-8,19);x.moveTo(5,0);x.lineTo(7+kick*14,19-kick*5);x.stroke();
+ x.strokeStyle='#111';x.lineWidth=5;x.beginPath();x.moveTo(-8,19);x.lineTo(-11,22);x.moveTo(7+kick*14,19-kick*5);x.lineTo(11+kick*16,21-kick*5);x.stroke();x.restore();
+}
+function draw(){
+ let W=innerWidth,H=innerHeight;x.clearRect(0,0,W,H);
+ if(!active){x.fillStyle='#0a1622';x.fillRect(0,0,W,H);return}
+ let scale=zoom?1.65:1, cx=zoom?p.x:.5,cy=zoom?p.y:.52;
+ x.save();x.translate(W/2,H/2);x.scale(scale,scale);x.translate(-cx*W,-cy*H);
+ x.fillStyle='#39743a';x.fillRect(0,0,W,H);for(let i=0;i<10;i++){x.fillStyle=i%2?'#3f7d40':'#367039';x.fillRect(0,i*H/10,W,H/10)}
+ x.strokeStyle='#fff';x.lineWidth=3;x.strokeRect(20,20,W-40,H-40);x.beginPath();x.moveTo(0,H/2);x.lineTo(W,H/2);x.stroke();x.beginPath();x.arc(W/2,H/2,70,0,Math.PI*2);x.stroke();x.strokeRect(W*.34,20,W*.32,110);
+ defenders.forEach(d=>{x.fillStyle='#d94141';x.beginPath();x.arc(d.x*W,d.y*H,14,0,Math.PI*2);x.fill()});
+ playerDraw(p.x*W,p.y*H,1.2);
+ x.fillStyle='#fff';x.beginPath();x.arc(ball.x*W,ball.y*H,8,0,Math.PI*2);x.fill();x.strokeStyle='#222';x.lineWidth=2;x.stroke();
+ x.restore();
+ x.fillStyle='#ffffff22';x.fillRect(18,H-24,150,7);x.fillStyle='#f5c85d';x.fillRect(18,H-24,150*p.stamina/100,7);
+}
+function loop(t){let dt=Math.min((t-last)/1000,.04);last=t;update(dt);draw();requestAnimationFrame(loop)}requestAnimationFrame(loop);
+</script>
+</html>
