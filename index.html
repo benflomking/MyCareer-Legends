@@ -247,7 +247,18 @@ for(let i=0;i<92;i++){
  const rr=.10+((i*37)%21)/155;
  const y=.085+((i*23)%23)/115;
  const curl=sphere(.025+((i*11)%9)/205,.024+((i*5)%10)/205,.026+((i*13)%10)/210,hair,head);
- curl.position.set(Math.cos(a)*rr+Math.sin(i)*.012,y,Math.sin(a)*rr*.76+Math.cos(i*1.3)*.014);
+ let cx=Math.cos(a)*rr+Math.sin(i)*.012;
+ let cz=Math.sin(a)*rr*.76+Math.cos(i*1.3)*.014;
+ // Side curls stay close to the skull and sit behind the head.
+ if(Math.abs(cx)>.09){
+   cx*=.62;
+   cz-=.10;
+ }
+ if(Math.abs(cx)>.115){
+   cx*=.82;
+   cz-=.035;
+ }
+ curl.position.set(cx,y,cz);
  curl.rotation.set(i*.37,i*.21,i*.16);
 }
 for(let i=0;i<9;i++){
@@ -375,7 +386,7 @@ function playTeamPhotoSequence(onDone){
  cap.textContent='השחקנים והשוער מסתדרים לצילום...';
  setTimeout(()=>{cap.textContent='כולם מוכנים...';},900);
  setTimeout(()=>{cap.textContent='צילום!';playCameraClick();flash.style.animation='photoFlashShot .35s ease';setTimeout(()=>flash.style.animation='',380)},1800);
- setTimeout(()=>{row.style.opacity='0';real.style.opacity='1';cap.textContent='התמונה האמיתית של הקבוצה';},2350);
+ setTimeout(()=>{row.style.opacity='0';real.style.opacity='1';cap.textContent='';},2350);
  setTimeout(()=>{wrap.hidden=true;if(onDone)onDone();},4700);
 }
 function showLineup(){
