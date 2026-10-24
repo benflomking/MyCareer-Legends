@@ -220,9 +220,9 @@ function sphere(sx,sy,sz,m,parent=player){const o=mesh(new T.SphereGeometry(1,20
 function limb(a,b,r,m,parent){const d=new T.Vector3().subVectors(b,a),o=mesh(new T.CylinderGeometry(r*.84,r,1,12),m,parent);o.position.copy(a).add(b).multiplyScalar(.5);o.scale.y=d.length();o.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),d.clone().normalize());return o}
 const pelvis=new T.Group();pelvis.name='pelvis';pelvis.position.y=.92;player.add(pelvis);
 const torso=new T.Group();torso.name='body';torso.position.y=.36;pelvis.add(torso);
-const chest=mesh(new T.CylinderGeometry(.33,.245,.64,32),sky,torso);chest.scale.set(1.10,1,0.94);
-const chestUpper=sphere(.315,.19,.235,sky,torso);chestUpper.position.y=.12;
-const waist=sphere(.225,.16,.195,sky,torso);waist.position.y=-.22;
+const chest=mesh(new T.CylinderGeometry(.34,.25,.62,32),sky,torso);chest.scale.set(1.12,1,0.96);
+const chestUpper=sphere(.325,.195,.242,sky,torso);chestUpper.position.y=.11;
+const waist=sphere(.232,.165,.202,sky,torso);waist.position.y=-.22;
 const stripeMat=white;
 // Argentina shirt stripes on both front (+Z) and back (-Z)
 for(const x of [-.20,0,.20]){
@@ -232,24 +232,24 @@ for(const x of [-.20,0,.20]){
   frontStripe.position.set(x,0,.335);
 }
 const neck=sphere(.09,.11,.09,skin,torso);neck.position.y=.38;
-const head=new T.Group();head.name='head';head.position.y=.53;torso.add(head);
-sphere(.158,.198,.154,skin,head);
-const jaw=sphere(.135,.102,.142,skin,head);jaw.position.set(0,-.122,-.002);
-const cheekL=sphere(.055,.048,.035,skin,head);cheekL.position.set(-.09,-.03,.135);
-const cheekR=sphere(.055,.048,.035,skin,head);cheekR.position.set(.09,-.03,.135);
+const head=new T.Group();head.name='head';head.position.y=.52;torso.add(head);
+sphere(.166,.192,.158,skin,head);
+const jaw=sphere(.146,.108,.146,skin,head);jaw.position.set(0,-.126,-.004);
+const cheekL=sphere(.061,.052,.040,skin,head);cheekL.position.set(-.092,-.026,.132);
+const cheekR=sphere(.061,.052,.040,skin,head);cheekR.position.set(.092,-.026,.132);
 const earL=sphere(.032,.052,.025,skin,head);earL.position.set(-.175,.015,.01);
 const earR=sphere(.032,.052,.025,skin,head);earR.position.set(.175,.015,.01);
-const nose=sphere(.042,.055,.070,skin,head);nose.position.set(0,-.012,.175);
+const nose=sphere(.046,.058,.076,skin,head);nose.position.set(0,-.014,.178);
 for(const sx of [-1,1]){const e=sphere(.033,.018,.012,white,head);e.position.set(sx*.065,.045,.155);const iris=sphere(.011,.01,.008,black,head);iris.position.set(sx*.065,.045,.168);const brow=mesh(new T.BoxGeometry(.065,.012,.012),hair,head);brow.position.set(sx*.064,.083,.164);brow.rotation.z=sx*.08}
-const mouth=mesh(new T.BoxGeometry(.07,.012,.012),mat(0x6b322c,.7),head);mouth.position.set(0,-.08,.16);
-const hairBase=sphere(.188,.13,.205,hair,head);hairBase.position.set(0,.14,-.018);
+const mouth=mesh(new T.BoxGeometry(.078,.013,.012),mat(0x6b322c,.7),head);mouth.position.set(0,-.082,.158);
+const hairBase=sphere(.192,.132,.222,hair,head);hairBase.position.set(0,.132,-.036);
 // תלתלים קדמיים + שכפול שלהם מאחורי הראש.
 // אין יותר "טלטלים צדדיים" נפרדים.
-for(let i=0;i<13;i++){
- const x=-.132+i*.022;
- const y=.10-(i%2)*.022+Math.sin(i*.85)*.006;
- const zFront=.145+Math.sin(i)*.014;
- const sx=.030+(i%3)*.006;
+for(let i=0;i<15;i++){
+ const x=-.14+i*.020;
+ const y=.092-(i%2)*.020+Math.sin(i*.82)*.005;
+ const zFront=.143+Math.sin(i)*.012;
+ const sx=.030+(i%3)*.0055;
  const sy=.029+((i+1)%3)*.003;
  const sz=.030+(i%2)*.004;
 
@@ -257,13 +257,14 @@ for(let i=0;i<13;i++){
  frontCurl.position.set(x,y,zFront);
  frontCurl.rotation.set(i*.18,i*.12,i*.10);
 
- const backCurl=sphere(sx*1.06,sy*1.06,sz*1.08,hair,head);
- backCurl.position.set(x*.88,y-.018,-.158-Math.sin(i)*.012);
+ // Duplicate the front curls into a compact rear curtain, lower and farther back.
+ const backCurl=sphere(sx*1.10,sy*1.10,sz*1.12,hair,head);
+ backCurl.position.set(x*.76,y-.030,-.172-Math.sin(i)*.010);
  backCurl.rotation.copy(frontCurl.rotation);
 }
 function arm(side){
  const dir=side==='L'?-1:1;
- const sh=new T.Group();sh.name='shoulder'+side;sh.position.set(dir*.285,.19,0);torso.add(sh);
+ const sh=new T.Group();sh.name='shoulder'+side;sh.position.set(dir*.300,.19,0);torso.add(sh);
 
  const sleeve=mesh(new T.CylinderGeometry(.12,.125,.30,18),sky,sh);
  sleeve.rotation.z=Math.PI/2;
@@ -288,10 +289,10 @@ const armL=arm('L'),armR=arm('R');
 function leg(side){
  const hip=new T.Group();hip.name='hip'+side;hip.position.set(side==='L'?-.135:.135,-.05,0);pelvis.add(hip);
  const short=mesh(new T.CylinderGeometry(.16,.145,.27,18),shorts,hip);short.position.y=-.13;
- const thigh=sphere(.115,.19,.105,skin,hip);thigh.position.y=-.34;
+ const thigh=sphere(.122,.185,.112,skin,hip);thigh.position.y=-.335;
  const knee=new T.Group();knee.name='knee'+side;knee.position.y=-.54;hip.add(knee);
  sphere(.082,.076,.08,skin,knee);
- const calf=sphere(.082,.18,.076,skin,knee);calf.position.set(0,-.22,.01);
+ const calf=sphere(.087,.175,.080,skin,knee);calf.position.set(0,-.215,.01);
  const sk=mesh(new T.CylinderGeometry(.07,.064,.20,14),sock,knee);sk.position.y=-.40;
  const foot=new T.Group();foot.name='foot'+side;foot.position.set(0,-.51,-.05);knee.add(foot);
  const shoe=mesh(new T.BoxGeometry(.17,.09,.35),black,foot);
