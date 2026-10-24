@@ -12,7 +12,7 @@
 #menu{position:fixed;inset:0;background:radial-gradient(circle at 25% 20%,#173753,#07111d 65%);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:25px;z-index:5}
 #menu h1{font-size:clamp(42px,8vw,82px);margin:0;letter-spacing:3px;direction:ltr}#menu h1 b{color:#f3cd68}#menu h2{margin:16px 0 4px;font-size:30px}#menu p{max-width:720px;color:#c7d6e4;line-height:1.6}
 button{border:0;border-radius:13px;background:#f3cd68;color:#101820;font-weight:900;font-size:18px;padding:13px 26px;cursor:pointer;margin:6px}button.secondary{background:#203a54;color:#fff;border:1px solid #ffffff22}
-#card{margin:20px 0;background:#ffffff0c;border:1px solid #ffffff20;border-radius:18px;padding:18px 26px;min-width:290px}.ten{font-size:46px;font-weight:900;color:#8bd2fa}.small{font-size:13px;color:#9db2c5}
+#cards{display:grid;grid-template-columns:repeat(4,minmax(170px,1fr));gap:10px;width:min(980px,95vw);margin:18px 0}.legendCard{background:#ffffff0c;border:1px solid #ffffff20;border-radius:16px;padding:14px 16px;cursor:pointer}.legendCard.active{outline:2px solid #f3cd68;background:#ffffff16}.legendCard b{display:block;font-size:18px}.legendCard .n{font-size:34px;font-weight:900;color:#8bd2fa}.small{font-size:12px;color:#9db2c5}@media(max-width:800px){#cards{grid-template-columns:1fr 1fr}}
 #stamina{position:absolute;left:18px;bottom:18px;width:170px}.bar{height:7px;background:#ffffff22;border-radius:20px;overflow:hidden;margin-top:5px}.bar i{display:block;height:100%;width:100%;background:#f3cd68}
 [hidden]{display:none!important}
 </style>
@@ -21,13 +21,18 @@ button{border:0;border-radius:13px;background:#f3cd68;color:#101820;font-weight:
 <body>
 <div id="menu">
  <h1>MYCAREER <b>LEGENDS</b></h1>
- <h2>דייגו מראדונה</h2>
- <div id="card"><div class="ten">10</div><b>ארגנטינה • קריירת אגדות</b><div class="small">דמות תלת־ממדית חדשה • דריבל • ספרינט • בעיטת הטעיה • מצלמת שחקן</div></div>
- <p>הגרסה הזאת מחזירה את מראדונה לתלת־ממד. בניתי אותו עם גוף מלא, פנים, שיער מתולתל, חולצת ארגנטינה ומפרקים שמונפשים בזמן ריצה ובעיטה.</p>
- <div><button id="play">משחק מהיר</button><button id="career" class="secondary">קריירת אגדות</button></div>
+ <h2>בחר אגדה ומשחק</h2>
+ <div id="cards">
+   <div class="legendCard active" data-legend="maradona"><span class="n">10</span><b>דייגו מראדונה</b><div class="small">ארגנטינה נגד אנגליה</div></div>
+   <div class="legendCard" data-legend="pele"><span class="n">10</span><b>פלה</b><div class="small">ברזיל נגד אורוגוואי</div></div>
+   <div class="legendCard" data-legend="jordan"><span class="n">23</span><b>מייקל ג׳ורדן</b><div class="small">Flu Game — שיקגו נגד יוטה</div></div>
+   <div class="legendCard" data-legend="kobe"><span class="n">8</span><b>קובי בראיינט</b><div class="small">לייקרס נגד סיקסרס</div></div>
+ </div>
+ <p id="matchDesc">מראדונה • ארגנטינה נגד אנגליה</p>
+ <div><button id="play">משחק</button><button id="training" class="secondary">מוד אימון</button><button id="career" class="secondary">קריירת אגדות</button></div>
 </div>
 <div id="ui" hidden>
- <div id="top"><div class="title">MARADONA • 10</div><div class="score"><span id="s1">0</span> : <span id="s2">0</span></div></div>
+ <div id="top"><div class="title" id="playerTitle">MARADONA • 10</div><div class="small" id="matchTitle">ארגנטינה נגד אנגליה</div><div class="score"><span id="s1">0</span> : <span id="s2">0</span></div></div>
  <div class="badge" id="cam">מצלמה: משחק</div>
  <div id="msg"></div>
  <div id="help">WASD / חיצים • Shift ספרינט • F בעיטת הטעיה • Space בעיטה • V זום על מראדונה • Esc תפריט</div>
@@ -36,7 +41,13 @@ button{border:0;border-radius:13px;background:#f3cd68;color:#101820;font-weight:
 <script type="module">
 import * as T from 'three';
 const $=id=>document.getElementById(id);
-let active=false,career=false,keys=new Set(),zoom=false,score=0,msgT=0,fakeT=0,kickT=0,celebrateT=0,stamina=100;
+let active=false,career=false,training=false,selectedLegend='maradona',keys=new Set(),zoom=false,score=0,msgT=0,fakeT=0,kickT=0,celebrateT=0,stamina=100;
+const presets={
+ maradona:{name:'MARADONA',num:10,match:'ארגנטינה נגד אנגליה',desc:'מראדונה • ארגנטינה נגד אנגליה',shirt:0x84cef5,shorts:0x171d28,sport:'football'},
+ pele:{name:'PELÉ',num:10,match:'ברזיל נגד אורוגוואי',desc:'פלה • ברזיל נגד אורוגוואי',shirt:0xf3db32,shorts:0x2456a6,sport:'football'},
+ jordan:{name:'JORDAN',num:23,match:'Flu Game — שיקגו נגד יוטה',desc:'מייקל ג׳ורדן • Flu Game',shirt:0xc81f32,shorts:0xc81f32,sport:'basketball'},
+ kobe:{name:'KOBE',num:8,match:'לייקרס נגד סיקסרס',desc:'קובי בראיינט • לייקרס נגד סיקסרס',shirt:0xf2bf32,shorts:0x542583,sport:'basketball'}
+};
 const scene=new T.Scene();scene.background=new T.Color(0x88b8d5);scene.fog=new T.Fog(0x88b8d5,42,85);
 const renderer=new T.WebGLRenderer({antialias:true,powerPreference:'low-power'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.35));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.outputColorSpace=T.SRGBColorSpace;document.body.prepend(renderer.domElement);
 const camera=new T.PerspectiveCamera(52,innerWidth/innerHeight,.1,120);
@@ -110,8 +121,28 @@ numBack.renderOrder=5;
 const ball=new T.Mesh(new T.SphereGeometry(.13,20,14),white);ball.castShadow=true;scene.add(ball);ball.position.set(0,.13,7.3);
 let px=0,pz=8,vx=0,vz=0,anim=0,ballOwned=true,bvx=0,bvz=0;
 function notice(t){$('msg').textContent=t;msgT=1.4}
-function start(c){career=c;active=true;$('menu').hidden=true;$('ui').hidden=false;px=0;pz=8;score=0;stamina=100;player.rotation.y=Math.PI;zoom=!!c;$('cam').textContent=zoom?'מצלמה: קריירה':'מצלמה: משחק';notice(c?'קריירת אגדות — המצלמה על מראדונה':'משחק מהיר')}
-$('play').onclick=()=>start(false);$('career').onclick=()=>start(true);
+function applyLegend(){
+ const p=presets[selectedLegend];
+ sky.color.setHex(p.shirt);shorts.color.setHex(p.shorts);
+ $('playerTitle').textContent=p.name+' • '+p.num;
+ $('matchTitle').textContent=training?'אימון חופשי':p.match;
+ $('matchDesc').textContent=p.desc;
+ // Argentina stripes only for Maradona; keep the others cleaner.
+ torso.children.forEach(o=>{if(o.material===stripeMat)o.visible=selectedLegend==='maradona'});
+}
+document.querySelectorAll('.legendCard').forEach(card=>card.onclick=()=>{
+ selectedLegend=card.dataset.legend;
+ document.querySelectorAll('.legendCard').forEach(c=>c.classList.toggle('active',c===card));
+ $('matchDesc').textContent=presets[selectedLegend].desc;
+});
+function start(c,isTraining=false){career=c;training=isTraining;active=true;$('menu').hidden=true;$('ui').hidden=false;px=0;pz=8;score=0;stamina=100;player.rotation.y=Math.PI;zoom=!!c;applyLegend();$('cam').textContent=zoom?'מצלמה: קריירה':'מצלמה: משחק';
+ if(training){notice('מוד אימון — בלי לחץ, תתאמן על דריבל ובעיטות');}
+ else if(c){notice('קריירת אגדות — המצלמה על השחקן');}
+ else{notice(presets[selectedLegend].match);}
+}
+$('play').onclick=()=>start(false,false);
+$('training').onclick=()=>start(false,true);
+$('career').onclick=()=>start(true,false);
 addEventListener('keydown',e=>{if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();keys.add(e.code);if(!active)return;if(e.code==='Escape'){active=false;$('menu').hidden=false;$('ui').hidden=true}if(e.code==='KeyV'){zoom=!zoom;$('cam').textContent=zoom?'מצלמה: קריירה':'מצלמה: משחק';notice(zoom?'זום על מראדונה':'מצלמת משחק')}if(e.code==='KeyF'&&fakeT<=0){fakeT=.55;notice('בעיטת הטעיה 😈')}if(e.code==='Space'&&kickT<=0){kickT=.55;if(ballOwned){ballOwned=false;bvx=(Math.random()-.5)*1.1;bvz=-15;notice('בעיטה! ⚽')}}});
 addEventListener('keyup',e=>keys.delete(e.code));
 function update(dt){
@@ -130,19 +161,24 @@ function update(dt){
    const ct=2.6-celebrateT;
    const jump=Math.max(0,Math.sin(ct*6.2))*.22;
    pelvis.position.y=.92+jump;
-   armL.sh.rotation.z=-2.05;
-   armR.sh.rotation.z=2.05;
-   armL.sh.rotation.x=-.35;
-   armR.sh.rotation.x=-.35;
-   torso.rotation.z=Math.sin(ct*7)*.12;
-   head.rotation.y=Math.sin(ct*4)*.2;
-   player.rotation.y+=dt*2.3;
+   // realistic celebration: arms up and out, elbows bent, no shoulder clipping
+   armL.sh.rotation.z=-1.18;
+   armR.sh.rotation.z=1.18;
+   armL.sh.rotation.x=-.58;
+   armR.sh.rotation.x=-.58;
+   armL.el.rotation.x=-1.0;
+   armR.el.rotation.x=-1.0;
+   torso.rotation.x=-.08;
+   torso.rotation.z=Math.sin(ct*5.5)*.07;
+   head.rotation.y=Math.sin(ct*3.2)*.16;
+   player.rotation.y+=dt*.72;
  }else{
    pelvis.position.y=.92;
+   torso.rotation.x*=Math.exp(-dt*8);
    head.rotation.y*=Math.exp(-dt*8);
  }
  player.position.set(px,0,pz);
- if(ballOwned){const dr=Math.sin(anim*1.55)*.24;ball.position.set(px+Math.sin(player.rotation.y)*(.38+dr),.13,pz+Math.cos(player.rotation.y)*(.38+dr));ball.rotation.x+=sp*dt*2}else{ball.position.x+=bvx*dt;ball.position.z+=bvz*dt;bvx*=.995;bvz*=.995;ball.rotation.x+=dt*10;if(ball.position.z<-23.2){if(Math.abs(ball.position.x)<3){score++;$('s1').textContent=score;celebrateT=2.6;notice('גווווול! מראדונה חוגג! 🐐🔥')}else notice('כמעט!');setTimeout(()=>{ballOwned=true;ball.position.set(px,.13,pz-.4)},450)}if(Math.hypot(ball.position.x-px,ball.position.z-pz)<.5)ballOwned=true}
+ if(ballOwned){const dr=Math.sin(anim*1.55)*.24;ball.position.set(px+Math.sin(player.rotation.y)*(.38+dr),.13,pz+Math.cos(player.rotation.y)*(.38+dr));ball.rotation.x+=sp*dt*2}else{ball.position.x+=bvx*dt;ball.position.z+=bvz*dt;bvx*=.995;bvz*=.995;ball.rotation.x+=dt*10;if(ball.position.z<-23.2){if(Math.abs(ball.position.x)<3){score++;$('s1').textContent=score;if(!training)celebrateT=2.6;notice(training?'פגיעה טובה! המשך להתאמן ⚽':'גווווול! חגיגה! 🔥')}else notice('כמעט!');setTimeout(()=>{ballOwned=true;ball.position.set(px,.13,pz-.4)},450)}if(Math.hypot(ball.position.x-px,ball.position.z-pz)<.5)ballOwned=true}
  const target=zoom
  ? new T.Vector3(px+Math.cos(player.rotation.y)*3.1,1.85,pz-Math.sin(player.rotation.y)*3.1)
  : new T.Vector3(px,8.2,pz+11.5);
