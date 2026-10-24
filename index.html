@@ -62,7 +62,14 @@ function limb(a,b,r,m,parent){const d=new T.Vector3().subVectors(b,a),o=mesh(new
 const pelvis=new T.Group();pelvis.name='pelvis';pelvis.position.y=.92;player.add(pelvis);
 const torso=new T.Group();torso.name='body';torso.position.y=.36;pelvis.add(torso);
 const chest=mesh(new T.CylinderGeometry(.32,.27,.55,20),sky,torso);chest.scale.x=1.18;
-const stripeMat=white;for(const x of [-.20,0,.20]){const s=mesh(new T.BoxGeometry(.085,.48,.012),stripeMat,torso);s.position.set(x,0,-.285)}
+const stripeMat=white;
+// Argentina shirt stripes on both front (+Z) and back (-Z)
+for(const x of [-.20,0,.20]){
+  const backStripe=mesh(new T.BoxGeometry(.085,.48,.012),stripeMat,torso);
+  backStripe.position.set(x,0,-.285);
+  const frontStripe=mesh(new T.BoxGeometry(.085,.48,.012),stripeMat,torso);
+  frontStripe.position.set(x,0,.285);
+}
 const neck=sphere(.09,.11,.09,skin,torso);neck.position.y=.38;
 const head=new T.Group();head.name='head';head.position.y=.53;torso.add(head);
 sphere(.17,.21,.17,skin,head);
@@ -84,11 +91,20 @@ for(let i=0;i<9;i++){
  const bang=sphere(.032+(i%3)*.006,.03,.031,hair,head);
  bang.position.set(-.105+i*.027,.105-(i%2)*.025,.145+Math.sin(i)*.018);
 }
-function arm(side){const sh=new T.Group();sh.name='shoulder'+side;sh.position.set(side==='L'?-.35:.35,.20,0,);torso.add(sh);const sleeve=mesh(new T.CylinderGeometry(.11,.115,.20,14),sky,sh);sleeve.rotation.z=Math.PI/2;const upper=new T.Group();upper.position.set(side==='L'?-.12:.12,0,0);sh.add(upper);limb(new T.Vector3(0,0,0),new T.Vector3(side==='L'?-.05:.05,-.27,0),.065,skin,upper);const el=new T.Group();el.name='elbow'+side;el.position.set(side==='L'?-.05:.05,-.27,0);upper.add(el);limb(new T.Vector3(0,0,0),new T.Vector3(side==='L'?-.02:.02,-.27,-.01),.05,skin,el);const hand=sphere(.06,.075,.05,skin,el);hand.position.set(side==='L'?-.02:.02,-.30,-.01);return {sh,el}}
+function arm(side){const sh=new T.Group();sh.name='shoulder'+side;sh.position.set(side==='L'?-.35:.35,.20,0,);torso.add(sh);const sleeve=mesh(new T.CylinderGeometry(.11,.115,.20,14),sky,sh);sleeve.rotation.z=Math.PI/2;
+if(side==='L'){
+  const captainBand=mesh(new T.CylinderGeometry(.122,.122,.052,16),black,sh);
+  captainBand.rotation.z=Math.PI/2;
+  captainBand.position.set(-.015,-.015,0);
+}
+const upper=new T.Group();upper.position.set(side==='L'?-.12:.12,0,0);sh.add(upper);limb(new T.Vector3(0,0,0),new T.Vector3(side==='L'?-.05:.05,-.27,0),.065,skin,upper);const el=new T.Group();el.name='elbow'+side;el.position.set(side==='L'?-.05:.05,-.27,0);upper.add(el);limb(new T.Vector3(0,0,0),new T.Vector3(side==='L'?-.02:.02,-.27,-.01),.05,skin,el);const hand=sphere(.06,.075,.05,skin,el);hand.position.set(side==='L'?-.02:.02,-.30,-.01);return {sh,el}}
 const armL=arm('L'),armR=arm('R');
 function leg(side){const hip=new T.Group();hip.name='hip'+side;hip.position.set(side==='L'?-.13:.13,-.05,0);pelvis.add(hip);const short=mesh(new T.CylinderGeometry(.14,.13,.25,14),shorts,hip);short.position.y=-.13;limb(new T.Vector3(0,-.22,0),new T.Vector3(0,-.52,0),.09,skin,hip);const knee=new T.Group();knee.name='knee'+side;knee.position.y=-.52;hip.add(knee);sphere(.075,.07,.075,skin,knee);limb(new T.Vector3(0,-.04,0),new T.Vector3(0,-.39,.01),.065,skin,knee);const sk=mesh(new T.CylinderGeometry(.065,.06,.19,12),sock,knee);sk.position.y=-.39;const foot=new T.Group();foot.name='foot'+side;foot.position.set(0,-.50,-.05);knee.add(foot);const shoe=mesh(new T.BoxGeometry(.15,.09,.30),black,foot);shoe.position.z=-.08;shoe.rotation.x=-.08;return {hip,knee,foot}}
 const legL=leg('L'),legR=leg('R');
-const ten=document.createElement('canvas');ten.width=128;ten.height=128;const tc=ten.getContext('2d');tc.fillStyle='#fff';tc.font='bold 72px Arial';tc.textAlign='center';tc.fillText('10',64,86);const ttex=new T.CanvasTexture(ten);const num=mesh(new T.PlaneGeometry(.22,.22),new T.MeshBasicMaterial({map:ttex,transparent:true}),torso);num.position.set(0,.03,.286);num.rotation.y=Math.PI;
+const ten=document.createElement('canvas');ten.width=128;ten.height=128;const tc=ten.getContext('2d');tc.clearRect(0,0,128,128);tc.fillStyle='#fff';tc.font='bold 72px Arial';tc.textAlign='center';tc.textBaseline='middle';tc.fillText('10',64,66);const ttex=new T.CanvasTexture(ten);
+const numBack=mesh(new T.PlaneGeometry(.24,.24),new T.MeshBasicMaterial({map:ttex,transparent:true,side:T.DoubleSide}),torso);
+numBack.position.set(0,.02,-.292);
+numBack.rotation.y=Math.PI;
 
 const ball=new T.Mesh(new T.SphereGeometry(.13,20,14),white);ball.castShadow=true;scene.add(ball);ball.position.set(0,.13,7.3);
 let px=0,pz=8,vx=0,vz=0,anim=0,ballOwned=true,bvx=0,bvz=0;
