@@ -143,7 +143,11 @@ function update(dt){
  }
  player.position.set(px,0,pz);
  if(ballOwned){const dr=Math.sin(anim*1.55)*.24;ball.position.set(px+Math.sin(player.rotation.y)*(.38+dr),.13,pz+Math.cos(player.rotation.y)*(.38+dr));ball.rotation.x+=sp*dt*2}else{ball.position.x+=bvx*dt;ball.position.z+=bvz*dt;bvx*=.995;bvz*=.995;ball.rotation.x+=dt*10;if(ball.position.z<-23.2){if(Math.abs(ball.position.x)<3){score++;$('s1').textContent=score;celebrateT=2.6;notice('גווווול! מראדונה חוגג! 🐐🔥')}else notice('כמעט!');setTimeout(()=>{ballOwned=true;ball.position.set(px,.13,pz-.4)},450)}if(Math.hypot(ball.position.x-px,ball.position.z-pz)<.5)ballOwned=true}
- const target=zoom?new T.Vector3(px+Math.sin(player.rotation.y)*1.8,2.0,pz+Math.cos(player.rotation.y)*3.4):new T.Vector3(px,8.2,pz+11.5);camera.position.lerp(target,1-Math.exp(-dt*4));camera.lookAt(px,zoom?1.05:.7,pz-(zoom?1.8:3.2));
+ const target=zoom
+ ? new T.Vector3(px+Math.cos(player.rotation.y)*3.1,1.85,pz-Math.sin(player.rotation.y)*3.1)
+ : new T.Vector3(px,8.2,pz+11.5);
+camera.position.lerp(target,1-Math.exp(-dt*4));
+camera.lookAt(px,zoom?1.05:.7,pz);
 }
 let last=performance.now();function loop(t){const dt=Math.min(.04,(t-last)/1000);last=t;update(dt);renderer.render(scene,camera);requestAnimationFrame(loop)}camera.position.set(0,8,19);camera.lookAt(0,0,4);requestAnimationFrame(loop);
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
