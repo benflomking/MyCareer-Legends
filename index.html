@@ -1,120 +1,108 @@
 <!doctype html>
 <html lang="he" dir="rtl">
+<head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>MyCareer Legends</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MyCareer Legends — Maradona</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#07111c;color:#fff;font-family:Arial,sans-serif;overflow:hidden}button,select{font:inherit}
-#game{position:fixed;inset:0;width:100%;height:100%;background:#123}
-#menu{position:fixed;inset:0;padding:34px 5vw;background:linear-gradient(120deg,#07111cf5,#10253aee);overflow:auto}
-.brand{letter-spacing:4px;direction:ltr}.brand b{color:#f5c85d}.eyebrow{color:#f5c85d;margin-top:24px}
-h1{font-size:46px;margin:8px 0 14px}p{color:#bfd0df;line-height:1.6}
-#cards{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:12px;margin:24px 0}
-.card{border:1px solid #ffffff24;border-top:4px solid var(--c);background:#16283a;color:#fff;border-radius:14px;padding:18px;text-align:right;cursor:pointer;min-height:135px}
-.card.sel{outline:2px solid #f5c85d}.num{float:left;font-size:40px;color:var(--c);font-weight:900}.card b{display:block;font-size:23px}.card small{display:block;margin-top:12px;color:#9fb2c5}
-.actions{display:flex;gap:10px;flex-wrap:wrap}.actions button{padding:12px 22px;border-radius:12px;border:1px solid #ffffff2a;background:#1e344a;color:#fff;cursor:pointer}.actions .primary{background:#f5c85d;color:#111;font-weight:bold}
-#hud{position:fixed;inset:14px 18px auto;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none}
-#hud>*{pointer-events:auto}.score{background:#07111ce8;padding:10px 18px;border-radius:12px;border-bottom:2px solid #f5c85d;text-align:center;min-width:190px}.score b{font-size:27px;display:block;direction:ltr}
-#help{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#07111ccc;padding:10px 16px;border-radius:12px;font-size:13px;text-align:center}
-#toast{position:fixed;top:80px;left:50%;transform:translateX(-50%);font-size:22px;font-weight:bold;color:#ffe39b;text-shadow:0 2px 5px #000}
-#zoomBadge{position:fixed;left:18px;bottom:18px;background:#07111ccc;padding:8px 12px;border-radius:10px;font-size:12px}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#06111d;color:#fff;font-family:Arial,sans-serif}canvas{display:block}
+#ui{position:fixed;inset:0;pointer-events:none}#top{position:absolute;top:14px;left:50%;transform:translateX(-50%);background:#07111ddd;border:1px solid #ffffff22;border-radius:14px;padding:9px 18px;text-align:center;min-width:245px}.title{font-weight:900;letter-spacing:2px;color:#f4d06f}.score{font-size:25px;font-weight:900;direction:ltr;margin-top:3px}
+#help{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);background:#07111ddd;border-radius:12px;padding:9px 14px;font-size:13px;white-space:nowrap}.badge{position:absolute;top:16px;right:16px;background:#07111ddd;border-radius:10px;padding:8px 11px;font-size:12px}
+#msg{position:absolute;top:90px;left:50%;transform:translateX(-50%);font-size:24px;font-weight:900;color:#ffe287;text-shadow:0 2px 8px #000;text-align:center}
+#menu{position:fixed;inset:0;background:radial-gradient(circle at 25% 20%,#173753,#07111d 65%);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:25px;z-index:5}
+#menu h1{font-size:clamp(42px,8vw,82px);margin:0;letter-spacing:3px;direction:ltr}#menu h1 b{color:#f3cd68}#menu h2{margin:16px 0 4px;font-size:30px}#menu p{max-width:720px;color:#c7d6e4;line-height:1.6}
+button{border:0;border-radius:13px;background:#f3cd68;color:#101820;font-weight:900;font-size:18px;padding:13px 26px;cursor:pointer;margin:6px}button.secondary{background:#203a54;color:#fff;border:1px solid #ffffff22}
+#card{margin:20px 0;background:#ffffff0c;border:1px solid #ffffff20;border-radius:18px;padding:18px 26px;min-width:290px}.ten{font-size:46px;font-weight:900;color:#8bd2fa}.small{font-size:13px;color:#9db2c5}
+#stamina{position:absolute;left:18px;bottom:18px;width:170px}.bar{height:7px;background:#ffffff22;border-radius:20px;overflow:hidden;margin-top:5px}.bar i{display:block;height:100%;width:100%;background:#f3cd68}
 [hidden]{display:none!important}
-@media(max-width:760px){#cards{grid-template-columns:1fr 1fr}h1{font-size:34px}.card{min-height:112px;padding:12px}.card b{font-size:19px}}
 </style>
-<canvas id="game"></canvas>
-
-<main id="menu">
-  <div class="brand">MYCAREER <b>LEGENDS</b></div>
-  <div class="eyebrow">הדרך שלך לאגדה</div>
-  <h1>המגרש מחכה לך.</h1>
-  <p>בחר אגדה. עלה למגרש. בנה קריירה.</p>
-  <div id="cards"></div>
-  <div class="actions">
-    <button id="quick" class="primary">משחק מהיר</button>
-    <button id="career">קריירת אגדות</button>
-  </div>
-  <p>מקשים: W A S D / חיצים • Shift ספרינט • F בעיטת הטעיה • Space בעיטה • V זום על השחקן • Esc חזרה</p>
-</main>
-
-<div id="hud" hidden>
-  <button id="back">חזרה</button>
-  <div class="score"><span id="teams"></span><b id="score">0 : 0</b><span id="time">90</span></div>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"}}</script>
+</head>
+<body>
+<div id="menu">
+ <h1>MYCAREER <b>LEGENDS</b></h1>
+ <h2>דייגו מראדונה</h2>
+ <div id="card"><div class="ten">10</div><b>ארגנטינה • קריירת אגדות</b><div class="small">דמות תלת־ממדית חדשה • דריבל • ספרינט • בעיטת הטעיה • מצלמת שחקן</div></div>
+ <p>הגרסה הזאת מחזירה את מראדונה לתלת־ממד. בניתי אותו עם גוף מלא, פנים, שיער מתולתל, חולצת ארגנטינה ומפרקים שמונפשים בזמן ריצה ובעיטה.</p>
+ <div><button id="play">משחק מהיר</button><button id="career" class="secondary">קריירת אגדות</button></div>
 </div>
-<div id="toast"></div>
-<div id="help" hidden>WASD / חיצים • Shift ספרינט • F הטעיה • Space בעיטה • V זום</div>
-<div id="zoomBadge" hidden>מצלמה: רגילה</div>
+<div id="ui" hidden>
+ <div id="top"><div class="title">MARADONA • 10</div><div class="score"><span id="s1">0</span> : <span id="s2">0</span></div></div>
+ <div class="badge" id="cam">מצלמה: משחק</div>
+ <div id="msg"></div>
+ <div id="help">WASD / חיצים • Shift ספרינט • F בעיטת הטעיה • Space בעיטה • V זום על מראדונה • Esc תפריט</div>
+ <div id="stamina">סיבולת<div class="bar"><i id="st"></i></div></div>
+</div>
+<script type="module">
+import * as T from 'three';
+const $=id=>document.getElementById(id);
+let active=false,career=false,keys=new Set(),zoom=false,score=0,msgT=0,fakeT=0,kickT=0,stamina=100;
+const scene=new T.Scene();scene.background=new T.Color(0x88b8d5);scene.fog=new T.Fog(0x88b8d5,42,85);
+const renderer=new T.WebGLRenderer({antialias:true,powerPreference:'low-power'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.35));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.outputColorSpace=T.SRGBColorSpace;document.body.prepend(renderer.domElement);
+const camera=new T.PerspectiveCamera(52,innerWidth/innerHeight,.1,120);
+scene.add(new T.HemisphereLight(0xeaf6ff,0x52653c,1.55));
+const sun=new T.DirectionalLight(0xfff2dc,2.4);sun.position.set(-10,17,9);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-18;sun.shadow.camera.right=18;sun.shadow.camera.top=25;sun.shadow.camera.bottom=-25;scene.add(sun);
+const fill=new T.DirectionalLight(0xaad8ff,.65);fill.position.set(8,8,-10);scene.add(fill);
 
-<script>
-const $=id=>document.getElementById(id), c=$('game'),x=c.getContext('2d');
-const legends={
- maradona:{name:'דייגו מראדונה',num:10,color:'#80c8ee',team:'ארגנטינה',opp:'אנגליה',sport:'football'},
- pele:{name:'פלה',num:10,color:'#f0d438',team:'ברזיל',opp:'אורוגוואי',sport:'football'},
- kobe:{name:'קובי בראיינט',num:8,color:'#e5b52c',team:'לייקרס',opp:'פילדלפיה',sport:'basketball'},
- jordan:{name:'מייקל ג׳ורדן',num:23,color:'#d52c3d',team:'שיקגו',opp:'יוטה',sport:'basketball'}
-};
-let sel='maradona',active=false,career=false,zoom=false,keys=new Set(),score=[0,0],time=90,last=performance.now(),fake=0,shotCD=0,toastT=0;
-let p={x:.5,y:.68,vx:0,vy:0,dir:-1,stamina:100}, ball={x:.5,y:.62,vx:0,vy:0,owned:true}, defenders=[];
-function menu(){
- $('cards').innerHTML=Object.entries(legends).map(([id,a])=>`<button class="card ${id===sel?'sel':''}" style="--c:${a.color}" data-id="${id}"><span class="num">${a.num}</span><b>${a.name}</b><small>${a.team} מול ${a.opp}</small></button>`).join('');
- document.querySelectorAll('.card').forEach(b=>b.onclick=()=>{sel=b.dataset.id;menu()});
-}
-function resize(){c.width=innerWidth*devicePixelRatio;c.height=innerHeight*devicePixelRatio;x.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0)}
-addEventListener('resize',resize);resize();menu();
+function mat(c,rough=.72){return new T.MeshStandardMaterial({color:c,roughness:rough})}
+const grass=mat(0x3e7a3c,.98),white=mat(0xf6f2e7,.85),sky=mat(0x84cef5,.88),skin=mat(0xa86d4d,.7),hair=mat(0x16100d,.95),black=mat(0x121317,.72),shorts=mat(0x171d28,.88),sock=mat(0xe9edf2,.9),goalmat=mat(0xf4f4ec,.7);
+const field=new T.Mesh(new T.PlaneGeometry(30,48),grass);field.rotation.x=-Math.PI/2;field.receiveShadow=true;scene.add(field);
+function lineBox(w,d,x,z){const g=new T.EdgesGeometry(new T.BoxGeometry(w,.01,d));const l=new T.LineSegments(g,new T.LineBasicMaterial({color:0xf4f4e9}));l.position.set(x,.012,z);scene.add(l)}
+lineBox(29.5,47.5,0,0);lineBox(14,7,0,-20.25);lineBox(14,7,0,20.25);
+const center=new T.Mesh(new T.RingGeometry(3.95,4.05,64),new T.MeshBasicMaterial({color:0xffffff,side:T.DoubleSide}));center.rotation.x=-Math.PI/2;center.position.y=.015;scene.add(center);
+const mid=new T.Mesh(new T.PlaneGeometry(.06,48),new T.MeshBasicMaterial({color:0xffffff}));mid.rotation.x=-Math.PI/2;mid.rotation.z=Math.PI/2;mid.position.y=.018;scene.add(mid);
+function goal(z,flip=1){const g=new T.Group();function post(x,y,z0,sx,sy,sz){const m=new T.Mesh(new T.BoxGeometry(sx,sy,sz),goalmat);m.position.set(x,y,z0);m.castShadow=true;g.add(m)}post(-3,1.2,z,.08,2.4,.08);post(3,1.2,z,.08,2.4,.08);post(0,2.4,z,6.08,.08,.08);const netmat=new T.LineBasicMaterial({color:0xdde4e5,transparent:true,opacity:.55});for(let x=-3;x<=3;x+=.5){let gg=new T.BufferGeometry().setFromPoints([new T.Vector3(x,0,z),new T.Vector3(x,2.4,z),new T.Vector3(x,0,z+flip*1.6)]);g.add(new T.Line(gg,netmat))}for(let y=.3;y<=2.4;y+=.3){let gg=new T.BufferGeometry().setFromPoints([new T.Vector3(-3,y,z),new T.Vector3(3,y,z)]);g.add(new T.Line(gg,netmat))}scene.add(g)}goal(-24,1);goal(24,-1);
+for(const side of [-1,1]){const stand=new T.Mesh(new T.BoxGeometry(7,6,52),mat(0x26313c,1));stand.position.set(side*18.2,2.5,0);scene.add(stand)}
+for(let i=0;i<120;i++){const m=new T.Mesh(new T.SphereGeometry(.14,6,4),mat(new T.Color().setHSL((i*.083)%1,.45,.45),1));m.position.set((i%2?1:-1)*(15.5+Math.random()*4),.7+Math.random()*4.5,(Math.random()-.5)*48);scene.add(m)}
 
-function reset(){
- p={x:.5,y:.72,vx:0,vy:0,dir:-1,stamina:100}; ball={x:.5,y:.65,vx:0,vy:0,owned:true};
- score=[0,0];time=career?120:90;fake=0;shotCD=0;
- defenders=Array.from({length:5},(_,i)=>({x:.16+i*.17,y:.34+(i%2)*.12,phase:i}));
-}
-function start(isCareer){career=isCareer;active=true;zoom=false;reset();$('menu').hidden=true;$('hud').hidden=false;$('help').hidden=false;$('zoomBadge').hidden=false;$('teams').textContent=legends[sel].team+' — '+legends[sel].opp;notice('יאללה! תעשה דריבל ותתקוף')}
-function notice(t){$('toast').textContent=t;toastT=1.7}
-$('quick').onclick=()=>start(false);$('career').onclick=()=>start(true);$('back').onclick=stop;
-function stop(){active=false;$('menu').hidden=false;$('hud').hidden=true;$('help').hidden=true;$('zoomBadge').hidden=true;$('toast').textContent='';keys.clear()}
-addEventListener('keydown',e=>{if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();keys.add(e.code);if(!active)return;if(e.code==='Escape')stop();if(e.code==='KeyV'){zoom=!zoom;$('zoomBadge').textContent='מצלמה: '+(zoom?'זום שחקן':'רגילה');notice(zoom?'זום על השחקן':'מצלמה רגילה')}if(e.code==='KeyF'&&fake<=0){fake=.55;notice('בעיטת הטעיה! 😈')}if(e.code==='Space'&&shotCD<=0)shoot()});
+const player=new T.Group();scene.add(player);player.position.set(0,0,8);
+function mesh(g,m,parent=player){const o=new T.Mesh(g,m);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o}
+function sphere(sx,sy,sz,m,parent=player){const o=mesh(new T.SphereGeometry(1,20,14),m,parent);o.scale.set(sx,sy,sz);return o}
+function limb(a,b,r,m,parent){const d=new T.Vector3().subVectors(b,a),o=mesh(new T.CylinderGeometry(r*.84,r,1,12),m,parent);o.position.copy(a).add(b).multiplyScalar(.5);o.scale.y=d.length();o.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),d.clone().normalize());return o}
+const pelvis=new T.Group();pelvis.name='pelvis';pelvis.position.y=.92;player.add(pelvis);
+const torso=new T.Group();torso.name='body';torso.position.y=.36;pelvis.add(torso);
+const chest=mesh(new T.CylinderGeometry(.32,.27,.55,20),sky,torso);chest.scale.x=1.18;
+const stripeMat=white;for(const x of [-.20,0,.20]){const s=mesh(new T.BoxGeometry(.085,.48,.012),stripeMat,torso);s.position.set(x,0,-.285)}
+const neck=sphere(.09,.11,.09,skin,torso);neck.position.y=.38;
+const head=new T.Group();head.name='head';head.position.y=.53;torso.add(head);
+sphere(.17,.21,.17,skin,head);
+const jaw=sphere(.135,.10,.145,skin,head);jaw.position.set(0,-.13,-.018);
+const nose=sphere(.032,.044,.055,skin,head);nose.position.set(0,-.015,-.17);
+for(const sx of [-1,1]){const e=sphere(.033,.018,.012,white,head);e.position.set(sx*.065,.045,-.155);const iris=sphere(.011,.01,.008,black,head);iris.position.set(sx*.065,.045,-.168);const brow=mesh(new T.BoxGeometry(.065,.012,.012),hair,head);brow.position.set(sx*.064,.083,-.164);brow.rotation.z=sx*.08}
+const mouth=mesh(new T.BoxGeometry(.07,.012,.012),mat(0x6b322c,.7),head);mouth.position.set(0,-.08,-.16);
+const hairBase=sphere(.183,.12,.18,hair,head);hairBase.position.y=.145;
+for(let i=0;i<42;i++){const a=i*2.39996,rr=.11+Math.random()*.07,y=.12+Math.random()*.14;const curl=sphere(.035,.035,.035,hair,head);curl.position.set(Math.cos(a)*rr,y,Math.sin(a)*rr*.72)}
+function arm(side){const sh=new T.Group();sh.name='shoulder'+side;sh.position.set(side==='L'?-.35:.35,.20,0,);torso.add(sh);const sleeve=mesh(new T.CylinderGeometry(.11,.115,.20,14),sky,sh);sleeve.rotation.z=Math.PI/2;const upper=new T.Group();upper.position.set(side==='L'?-.12:.12,0,0);sh.add(upper);limb(new T.Vector3(0,0,0),new T.Vector3(side==='L'?-.05:.05,-.27,0),.065,skin,upper);const el=new T.Group();el.name='elbow'+side;el.position.set(side==='L'?-.05:.05,-.27,0);upper.add(el);limb(new T.Vector3(0,0,0),new T.Vector3(side==='L'?-.02:.02,-.27,-.01),.05,skin,el);const hand=sphere(.06,.075,.05,skin,el);hand.position.set(side==='L'?-.02:.02,-.30,-.01);return {sh,el}}
+const armL=arm('L'),armR=arm('R');
+function leg(side){const hip=new T.Group();hip.name='hip'+side;hip.position.set(side==='L'?-.13:.13,-.05,0);pelvis.add(hip);const short=mesh(new T.CylinderGeometry(.14,.13,.25,14),shorts,hip);short.position.y=-.13;limb(new T.Vector3(0,-.22,0),new T.Vector3(0,-.52,0),.09,skin,hip);const knee=new T.Group();knee.name='knee'+side;knee.position.y=-.52;hip.add(knee);sphere(.075,.07,.075,skin,knee);limb(new T.Vector3(0,-.04,0),new T.Vector3(0,-.39,.01),.065,skin,knee);const sk=mesh(new T.CylinderGeometry(.065,.06,.19,12),sock,knee);sk.position.y=-.39;const foot=new T.Group();foot.name='foot'+side;foot.position.set(0,-.50,-.05);knee.add(foot);const shoe=mesh(new T.BoxGeometry(.15,.09,.30),black,foot);shoe.position.z=-.08;shoe.rotation.x=-.08;return {hip,knee,foot}}
+const legL=leg('L'),legR=leg('R');
+const ten=document.createElement('canvas');ten.width=128;ten.height=128;const tc=ten.getContext('2d');tc.fillStyle='#fff';tc.font='bold 72px Arial';tc.textAlign='center';tc.fillText('10',64,86);const ttex=new T.CanvasTexture(ten);const num=mesh(new T.PlaneGeometry(.22,.22),new T.MeshBasicMaterial({map:ttex,transparent:true}),torso);num.position.set(0,.03,.286);num.rotation.y=Math.PI;
+
+const ball=new T.Mesh(new T.SphereGeometry(.13,20,14),white);ball.castShadow=true;scene.add(ball);ball.position.set(0,.13,7.3);
+let px=0,pz=8,vx=0,vz=0,anim=0,ballOwned=true,bvx=0,bvz=0;
+function notice(t){$('msg').textContent=t;msgT=1.4}
+function start(c){career=c;active=true;$('menu').hidden=true;$('ui').hidden=false;px=0;pz=8;score=0;stamina=100;zoom=!!c;$('cam').textContent=zoom?'מצלמה: קריירה':'מצלמה: משחק';notice(c?'קריירת אגדות — המצלמה על מראדונה':'משחק מהיר')}
+$('play').onclick=()=>start(false);$('career').onclick=()=>start(true);
+addEventListener('keydown',e=>{if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();keys.add(e.code);if(!active)return;if(e.code==='Escape'){active=false;$('menu').hidden=false;$('ui').hidden=true}if(e.code==='KeyV'){zoom=!zoom;$('cam').textContent=zoom?'מצלמה: קריירה':'מצלמה: משחק';notice(zoom?'זום על מראדונה':'מצלמת משחק')}if(e.code==='KeyF'&&fakeT<=0){fakeT=.55;notice('בעיטת הטעיה 😈')}if(e.code==='Space'&&kickT<=0){kickT=.55;if(ballOwned){ballOwned=false;bvx=(Math.random()-.5)*1.1;bvz=-15;notice('בעיטה! ⚽')}}});
 addEventListener('keyup',e=>keys.delete(e.code));
-
-function shoot(){
- if(!ball.owned)return;shotCD=.45;ball.owned=false;
- const targetX=.5+(Math.random()-.5)*.16,targetY=.04;
- let dx=targetX-p.x,dy=targetY-p.y,n=Math.hypot(dx,dy)||1,speed=.92;
- ball.vx=dx/n*speed;ball.vy=dy/n*speed;notice('בעיטה! ⚽');
-}
 function update(dt){
- if(!active)return;
- time=Math.max(0,time-dt);shotCD=Math.max(0,shotCD-dt);fake=Math.max(0,fake-dt);toastT=Math.max(0,toastT-dt);if(!toastT)$('toast').textContent='';
- let dx=(keys.has('KeyD')||keys.has('ArrowRight')?1:0)-(keys.has('KeyA')||keys.has('ArrowLeft')?1:0);
- let dy=(keys.has('KeyS')||keys.has('ArrowDown')?1:0)-(keys.has('KeyW')||keys.has('ArrowUp')?1:0);
- let n=Math.hypot(dx,dy)||1,sprint=keys.has('ShiftLeft')&&p.stamina>1,spd=sprint?.42:.28;
- p.stamina=Math.max(0,Math.min(100,p.stamina+(sprint?-28:18)*dt));
- p.x=Math.max(.04,Math.min(.96,p.x+dx/n*spd*dt));p.y=Math.max(.12,Math.min(.92,p.y+dy/n*spd*dt));if(dy) p.dir=Math.sign(dy);
- defenders.forEach((d,i)=>{let tx=p.x+(i-2)*.035,ty=p.y-.18-(i%2)*.045;d.x+=(tx-d.x)*dt*(.55+i*.07);d.y+=(ty-d.y)*dt*(.55+i*.06)});
- if(ball.owned){let sway=Math.sin(performance.now()/90)*.018;ball.x=p.x+sway;ball.y=p.y-.055}else{ball.x+=ball.vx*dt;ball.y+=ball.vy*dt;ball.vx*=.996;ball.vy*=.996;if(ball.y<.045){if(Math.abs(ball.x-.5)<.14){score[0]++;notice('גווווול! 🔥');setTimeout(()=>{if(active){p.x=.5;p.y=.72;ball.owned=true}},500)}else{notice('החטאה');setTimeout(()=>{if(active)ball.owned=true},350)}ball.vx=ball.vy=0}if(Math.hypot(ball.x-p.x,ball.y-p.y)<.06){ball.owned=true;notice('הכדור חזר אליך')}}
- if(time<=0){notice(score[0]>score[1]?'ניצחון!':'סיום המשחק');setTimeout(stop,1200)}
- $('score').textContent=score[0]+' : '+score[1];$('time').textContent=Math.ceil(time)+' שנ׳';
+ if(!active)return;msgT-=dt;if(msgT<=0)$('msg').textContent='';fakeT=Math.max(0,fakeT-dt);kickT=Math.max(0,kickT-dt);
+ let dx=(keys.has('KeyD')||keys.has('ArrowRight')?1:0)-(keys.has('KeyA')||keys.has('ArrowLeft')?1:0),dz=(keys.has('KeyS')||keys.has('ArrowDown')?1:0)-(keys.has('KeyW')||keys.has('ArrowUp')?1:0);let n=Math.hypot(dx,dz)||1;
+ const sprint=keys.has('ShiftLeft')&&stamina>1&&(dx||dz);const speed=sprint?7.4:5.0;stamina=T.MathUtils.clamp(stamina+(sprint?-24:17)*dt,0,100);$('st').style.width=stamina+'%';
+ vx=T.MathUtils.lerp(vx,dx/n*speed,1-Math.exp(-dt*9));vz=T.MathUtils.lerp(vz,dz/n*speed,1-Math.exp(-dt*9));if(!dx&&!dz){vx*=Math.exp(-dt*11);vz*=Math.exp(-dt*11)}
+ px=T.MathUtils.clamp(px+vx*dt,-14,14);pz=T.MathUtils.clamp(pz+vz*dt,-22,22);const sp=Math.hypot(vx,vz);if(sp>.15){const a=Math.atan2(vx,vz),d=Math.atan2(Math.sin(a-player.rotation.y),Math.cos(a-player.rotation.y));player.rotation.y+=d*(1-Math.exp(-dt*10))}
+ anim+=dt*(2.5+sp*1.3);const wave=Math.sin(anim),stride=Math.min(sp/6,1);
+ legL.hip.rotation.x=T.MathUtils.lerp(legL.hip.rotation.x,wave*.75*stride,1-Math.exp(-dt*16));legR.hip.rotation.x=T.MathUtils.lerp(legR.hip.rotation.x,-wave*.75*stride,1-Math.exp(-dt*16));
+ legL.knee.rotation.x=T.MathUtils.lerp(legL.knee.rotation.x,Math.max(0,-wave)*1.05*stride,1-Math.exp(-dt*18));legR.knee.rotation.x=T.MathUtils.lerp(legR.knee.rotation.x,Math.max(0,wave)*1.05*stride,1-Math.exp(-dt*18));
+ armL.sh.rotation.x=-wave*.55*stride;armR.sh.rotation.x=wave*.55*stride;armL.el.rotation.x=-.35;armR.el.rotation.x=-.35;torso.rotation.z=Math.sin(anim)*.04*stride;head.rotation.z=-torso.rotation.z*.5;
+ if(fakeT>0){const t=1-fakeT/.55,sw=Math.sin(t*Math.PI);legR.hip.rotation.x=-1.15*sw;legR.knee.rotation.x=.85*sw;torso.rotation.z=.18*sw}
+ if(kickT>0){const t=1-kickT/.55,sw=Math.sin(t*Math.PI);legR.hip.rotation.x=-1.45*sw;legR.knee.rotation.x=.65*(1-sw);armL.sh.rotation.x=-.7*sw}
+ player.position.set(px,0,pz);
+ if(ballOwned){const dr=Math.sin(anim*1.55)*.24;ball.position.set(px+Math.sin(player.rotation.y)*(.38+dr),.13,pz+Math.cos(player.rotation.y)*(.38+dr));ball.rotation.x+=sp*dt*2}else{ball.position.x+=bvx*dt;ball.position.z+=bvz*dt;bvx*=.995;bvz*=.995;ball.rotation.x+=dt*10;if(ball.position.z<-23.2){if(Math.abs(ball.position.x)<3){score++;$('s1').textContent=score;notice('גווווול! 🔥')}else notice('כמעט!');setTimeout(()=>{ballOwned=true;ball.position.set(px,.13,pz-.4)},450)}if(Math.hypot(ball.position.x-px,ball.position.z-pz)<.5)ballOwned=true}
+ const target=zoom?new T.Vector3(px+Math.sin(player.rotation.y)*1.8,2.0,pz+Math.cos(player.rotation.y)*3.4):new T.Vector3(px,8.2,pz+11.5);camera.position.lerp(target,1-Math.exp(-dt*4));camera.lookAt(px,zoom?1.05:.7,pz-(zoom?1.8:3.2));
 }
-function playerDraw(px,py,s){
- const a=legends[sel],kick=fake>0?Math.sin((.55-fake)/.55*Math.PI)*.8:0;
- x.save();x.translate(px,py);x.scale(s,s);
- x.fillStyle='#1c1c1c';x.beginPath();x.ellipse(0,-37,11,8,0,Math.PI,Math.PI*2);x.fill();
- x.fillStyle='#a86f4b';x.beginPath();x.arc(0,-32,9,0,Math.PI*2);x.fill();
- x.fillStyle=a.color;x.fillRect(-10,-24,20,24);x.fillStyle='#111';x.font='bold 10px Arial';x.textAlign='center';x.fillText(a.num,0,-8);
- x.strokeStyle='#a86f4b';x.lineWidth=5;x.lineCap='round';x.beginPath();x.moveTo(-7,-20);x.lineTo(-14,-7);x.moveTo(7,-20);x.lineTo(14,-7);x.stroke();
- x.strokeStyle='#a86f4b';x.lineWidth=6;x.beginPath();x.moveTo(-5,0);x.lineTo(-8,19);x.moveTo(5,0);x.lineTo(7+kick*14,19-kick*5);x.stroke();
- x.strokeStyle='#111';x.lineWidth=5;x.beginPath();x.moveTo(-8,19);x.lineTo(-11,22);x.moveTo(7+kick*14,19-kick*5);x.lineTo(11+kick*16,21-kick*5);x.stroke();x.restore();
-}
-function draw(){
- let W=innerWidth,H=innerHeight;x.clearRect(0,0,W,H);
- if(!active){x.fillStyle='#0a1622';x.fillRect(0,0,W,H);return}
- let scale=zoom?1.65:1, cx=zoom?p.x:.5,cy=zoom?p.y:.52;
- x.save();x.translate(W/2,H/2);x.scale(scale,scale);x.translate(-cx*W,-cy*H);
- x.fillStyle='#39743a';x.fillRect(0,0,W,H);for(let i=0;i<10;i++){x.fillStyle=i%2?'#3f7d40':'#367039';x.fillRect(0,i*H/10,W,H/10)}
- x.strokeStyle='#fff';x.lineWidth=3;x.strokeRect(20,20,W-40,H-40);x.beginPath();x.moveTo(0,H/2);x.lineTo(W,H/2);x.stroke();x.beginPath();x.arc(W/2,H/2,70,0,Math.PI*2);x.stroke();x.strokeRect(W*.34,20,W*.32,110);
- defenders.forEach(d=>{x.fillStyle='#d94141';x.beginPath();x.arc(d.x*W,d.y*H,14,0,Math.PI*2);x.fill()});
- playerDraw(p.x*W,p.y*H,1.2);
- x.fillStyle='#fff';x.beginPath();x.arc(ball.x*W,ball.y*H,8,0,Math.PI*2);x.fill();x.strokeStyle='#222';x.lineWidth=2;x.stroke();
- x.restore();
- x.fillStyle='#ffffff22';x.fillRect(18,H-24,150,7);x.fillStyle='#f5c85d';x.fillRect(18,H-24,150*p.stamina/100,7);
-}
-function loop(t){let dt=Math.min((t-last)/1000,.04);last=t;update(dt);draw();requestAnimationFrame(loop)}requestAnimationFrame(loop);
+let last=performance.now();function loop(t){const dt=Math.min(.04,(t-last)/1000);last=t;update(dt);renderer.render(scene,camera);requestAnimationFrame(loop)}camera.position.set(0,8,19);camera.lookAt(0,0,4);requestAnimationFrame(loop);
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
 </script>
+</body>
 </html>
