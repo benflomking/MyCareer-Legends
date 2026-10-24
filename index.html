@@ -512,10 +512,35 @@ function showFinalCeremony(){
  ceremonyStarted=true;active=false;
  $('ui').hidden=true;$('ceremony').hidden=false;
  buildCeremonyTeam();
- $('ceremonyCaption').textContent='הגביע מונח על הבמה...';
- sayCommentary('¡Final del partido! ¡Se viene la ceremonia!','סיום המשחק! טקס הגביע מתחיל!',{rate:.95,pitch:1.06});
- setTimeout(()=>{$('ceremonyCaption').textContent='הקפטן מתקרב אל הגביע...';sayCommentary('¡El capitán se acerca a la Copa!','הקפטן מתקרב לגביע!',{rate:.95,pitch:1.08})},1800);
- setTimeout(()=>{$('finalCup').style.opacity='0';$('captainLift').style.opacity='1';$('captainLift').style.transform='translateX(-50%) translateY(-35px) scale(1.08)';$('ceremonyCaption').textContent='הקפטן מניף את גביע העולם!';sayCommentary('¡LEVANTA LA COPA DEL MUNDO! ¡CAMPEONES!','הקפטן מניף את גביע העולם! אלופים!',{rate:.82,pitch:1.12})},3600);
+
+ const pres=$('fifaPresident'),cap=$('captainCeremony'),cup=$('finalCup'),lift=$('captainLift'),txt=$('ceremonyCaption');
+ pres.style.opacity='0';cap.style.opacity='0';cup.style.opacity='0';lift.style.opacity='0';
+ pres.style.transform='translateX(-25px)';cap.style.transform='translateX(25px)';
+ cup.style.left='29%';cup.style.bottom='190px';cup.style.transform='translateX(-50%) scale(1)';
+ txt.textContent='הטקס מתחיל...';
+
+ sayCommentary('¡Final del partido! ¡Comienza la ceremonia de la Copa del Mundo!','סיום המשחק! טקס גביע העולם מתחיל!',{rate:.94,pitch:1.06});
+
+ setTimeout(()=>{
+   pres.style.opacity='1';pres.style.transform='translateX(0)';
+   cap.style.opacity='1';cap.style.transform='translateX(0)';
+   cup.style.opacity='1';
+   txt.textContent='נשיא פיפ״א מגיע עם הגביע אל הקפטן...';
+   sayCommentary('¡El presidente de la FIFA entrega la Copa al capitán!','נשיא פיפ״א מביא את הגביע לקפטן!',{rate:.92,pitch:1.07});
+ },1600);
+
+ setTimeout(()=>{
+   cup.style.left='54%';cup.style.bottom='178px';
+   txt.textContent='הגביע עובר לידיים של הקפטן...';
+ },3200);
+
+ setTimeout(()=>{
+   cup.style.opacity='0';
+   lift.style.opacity='1';
+   lift.style.transform='translateX(-50%) translateY(-45px) scale(1.1)';
+   txt.textContent='הקפטן מניף את גביע העולם!';
+   sayCommentary('¡LEVANTA LA COPA DEL MUNDO! ¡CAMPEONES!','הקפטן מניף את גביע העולם! אלופים!',{rate:.82,pitch:1.12});
+ },4500);
 }
 function update(dt){
  if(!active)return;
