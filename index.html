@@ -42,7 +42,8 @@ button{border:0;border-radius:13px;background:#f3cd68;color:#101820;font-weight:
   <div style="background:#10253a;border:1px solid #ffffff22;border-radius:18px;padding:22px;max-width:980px;width:95%;text-align:center">
     <div id="trophy" style="font-size:58px;line-height:1">🏆</div>
     <h2 style="margin:6px 0">הרכבים</h2>
-    <div class="small" style="margin-bottom:12px">מונדיאל 1986 • השדרן מקריא את ההרכבים</div>
+    <div class="small" style="margin-bottom:6px">מונדיאל 1986 • השדרן מקריא את ההרכבים</div>
+    <div id="lineupStatus" style="font-size:18px;font-weight:900;color:#ffe287;margin-bottom:12px"></div>
     <div id="lineupTeams" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;text-align:right;max-height:58vh;overflow:auto"></div>
     <div class="small" style="margin-top:12px">עוד רגע עוברים אוטומטית לצילום הקבוצה...</div>
   </div>
@@ -411,12 +412,18 @@ function showLineup(){
    '<div><b>'+p.name+'</b><div class="lineupList">'+l.home.map(v=>lineupCard(v,homeCls)).join('')+'</div></div>'+
    '<div><b>'+awayName+'</b><div class="lineupList">'+l.away.map(v=>lineupCard(v,awayCls)).join('')+'</div></div>';
  $('lineup').hidden=false;
+ $('lineupStatus').textContent='מקריא את ההרכבים...';
  const sp=lineupSpeech[selectedLegend];
  const es='¡Atención, atención! ¡Llegó el momento de las alineaciones! '+sp.home+' Y ahora el rival. '+sp.away+' ¡Señoras y señores, esto va a ser histórico!';
  $('commentary').textContent='השדרן מקריא בהתלהבות את ההרכבים';
  commentT=11;
  speakSpanish(es,{rate:.88,pitch:1.04});
+ clearTimeout(window.__lineupDone);
  clearTimeout(window.__lineupAuto);
+ window.__lineupDone=setTimeout(()=>{
+   $('lineupStatus').textContent='סיימנו את ההרכבים ✅';
+   try{sayCommentary('¡Listas las alineaciones!','סיימנו את ההרכבים!',{rate:.95,pitch:1.03});}catch(e){}
+ },5200);
  window.__lineupAuto=setTimeout(()=>{
    try{if('speechSynthesis' in window)speechSynthesis.cancel();}catch(e){}
    $('lineup').hidden=true;
