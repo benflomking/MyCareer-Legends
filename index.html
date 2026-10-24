@@ -38,13 +38,13 @@ button{border:0;border-radius:13px;background:#f3cd68;color:#101820;font-weight:
  <div id="msg"></div>
  <div id="juggleText" style="position:absolute;top:130px;left:50%;transform:translateX(-50%);font-size:22px;font-weight:900;color:#fff;text-shadow:0 2px 7px #000"></div>
  <div id="commentary" style="position:absolute;bottom:58px;left:50%;transform:translateX(-50%);background:#07111ddd;border-radius:10px;padding:7px 12px;font-size:14px;max-width:70vw;text-align:center"></div>
- <div id="help">WASD / חיצים • Shift ספרינט • F בעיטת הטעיה • J להקפיץ • Space בעיטה • V זום • Esc תפריט</div>
+ <div id="help">WASD / חיצים • Shift ספרינט • F הטעיה • J הקפצה • Q קפיצה/נגיחה • G יד • B הטבעה בכדורסל • Space בעיטה • V זום</div>
  <div id="stamina">סיבולת<div class="bar"><i id="st"></i></div></div>
 </div>
 <script type="module">
 import * as T from 'three';
 const $=id=>document.getElementById(id);
-let active=false,career=false,training=false,selectedLegend='maradona',keys=new Set(),zoom=false,score=0,msgT=0,commentT=0,fakeT=0,kickT=0,celebrateT=0,juggleT=0,juggleQueue=0,juggleCount=0,juggleHeight=0,juggleVel=0,stamina=100;
+let active=false,career=false,training=false,selectedLegend='maradona',keys=new Set(),zoom=false,score=0,msgT=0,commentT=0,fakeT=0,kickT=0,celebrateT=0,jumpT=0,headerT=0,handT=0,dunkT=0,juggleT=0,juggleQueue=0,juggleCount=0,juggleHeight=0,juggleVel=0,stamina=100;
 const presets={
  maradona:{name:'MARADONA',num:10,match:'ארגנטינה נגד אנגליה',desc:'מראדונה • ארגנטינה נגד אנגליה',shirt:0x84cef5,shorts:0x171d28,sport:'football'},
  pele:{name:'PELÉ',num:10,match:'ברזיל נגד אורוגוואי',desc:'פלה • ברזיל נגד אורוגוואי',shirt:0xf3db32,shorts:0x2456a6,sport:'football'},
@@ -87,6 +87,14 @@ const kArmL=new T.Mesh(new T.CylinderGeometry(.055,.065,.72,10),mat(0x244f9c,.7)
 const kArmR=kArmL.clone();kArmR.position.x=.38;keeper.add(kArmR);
 keeper.position.set(0,0,-22.2);
 const keeper2=keeper.clone();keeper2.position.set(0,0,22.2);keeper2.rotation.y=Math.PI;opponentsGroup.add(keeper2);
+
+// Basketball setup for Jordan/Kobe.
+const basketballGroup=new T.Group();scene.add(basketballGroup);
+const court=new T.Mesh(new T.PlaneGeometry(15,28),mat(0xb9854c,.9));court.rotation.x=-Math.PI/2;court.position.y=.02;basketballGroup.add(court);
+const backboard=new T.Mesh(new T.BoxGeometry(3.2,1.8,.12),white);backboard.position.set(0,3.1,-12.6);basketballGroup.add(backboard);
+const rim=new T.Mesh(new T.TorusGeometry(.48,.055,12,32),mat(0xd65a1f,.6));rim.rotation.x=Math.PI/2;rim.position.set(0,3.0,-12.0);basketballGroup.add(rim);
+const pole=new T.Mesh(new T.CylinderGeometry(.11,.14,3.1,12),black);pole.position.set(0,1.55,-13.3);basketballGroup.add(pole);
+basketballGroup.visible=false;
 
 
 const player=new T.Group();scene.add(player);player.position.set(0,0,8);player.rotation.y=Math.PI;
@@ -174,7 +182,7 @@ function applyLegend(){
  $('matchTitle').textContent=training?'אימון חופשי':p.match;
  $('matchDesc').textContent=p.desc;
  // Argentina stripes only for Maradona; keep the others cleaner.
- torso.children.forEach(o=>{if(o.material===stripeMat)o.visible=selectedLegend==='maradona'});opponentsGroup.visible=p.sport==='football';
+ torso.children.forEach(o=>{if(o.material===stripeMat)o.visible=selectedLegend==='maradona'});opponentsGroup.visible=p.sport==='football';basketballGroup.visible=p.sport==='basketball';field.visible=p.sport==='football';ball.material.color.setHex(p.sport==='basketball'?0xd86f16:0xf6f2e7);
 }
 document.querySelectorAll('.legendCard').forEach(card=>card.onclick=()=>{
  selectedLegend=card.dataset.legend;
@@ -183,7 +191,7 @@ document.querySelectorAll('.legendCard').forEach(card=>card.onclick=()=>{
  applyLegend();
 });
 applyLegend();
-function start(c,isTraining=false){career=c;training=isTraining;active=true;$('menu').hidden=true;$('ui').hidden=false;px=0;pz=8;score=0;stamina=100;juggleT=0;juggleQueue=0;juggleCount=0;juggleHeight=0;juggleVel=0;$('juggleText').textContent='';$('commentary').textContent='';player.rotation.y=Math.PI;defenders[0].position.set(-2.8,0,-4);defenders[1].position.set(2.5,0,-7);defenders[2].position.set(-1.2,0,-11);defenders[3].position.set(1.5,0,-15);keeper.position.set(0,0,-22.2);keeper2.position.set(0,0,22.2);zoom=!!c;applyLegend();$('cam').textContent=zoom?'מצלמה: קריירה':'מצלמה: משחק';
+function start(c,isTraining=false){career=c;training=isTraining;active=true;$('menu').hidden=true;$('ui').hidden=false;px=0;pz=8;score=0;stamina=100;juggleT=0;juggleQueue=0;juggleCount=0;juggleHeight=0;juggleVel=0;jumpT=0;headerT=0;handT=0;dunkT=0;$('juggleText').textContent='';$('commentary').textContent='';player.rotation.y=Math.PI;defenders[0].position.set(-2.8,0,-4);defenders[1].position.set(2.5,0,-7);defenders[2].position.set(-1.2,0,-11);defenders[3].position.set(1.5,0,-15);keeper.position.set(0,0,-22.2);keeper2.position.set(0,0,22.2);zoom=!!c;applyLegend();$('cam').textContent=zoom?'מצלמה: קריירה':'מצלמה: משחק';
  if(training){notice('מוד אימון — דריבל, בעיטות והקפצות עם J');}
  else if(c){notice('קריירת אגדות — המצלמה על השחקן');}
  else{notice(presets[selectedLegend].match);}
@@ -201,13 +209,41 @@ addEventListener('keydown',e=>{if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight
     $('juggleText').textContent=(selectedLegend==='maradona'?'מראדונה מקפיץ':'השחקן מקפיץ')+(juggleCount>1?' ×'+juggleCount:'');
     sayCommentary(juggleCount===1?'¡Qué toque!':'¡Otra vez!','איזו נגיעה!'+(juggleCount>1?' רצף הקפצות ×'+juggleCount:''));
   }
-}if(e.code==='Space'&&kickT<=0){kickT=.55;if(ballOwned){ballOwned=false;bvx=(Math.random()-.5)*1.1;bvz=-15;if(juggleT>0||juggleHeight>.2){ball.position.y=Math.max(ball.position.y,.65);notice('הקפצה מעל השוער! 🌈⚽');sayCommentary('¡La vaselina!','צ׳יפ מעל השוער!')}else notice('בעיטה! ⚽');sayCommentary('¡Disparo!','בעיטה לשער!')}}});
+}if(e.code==='KeyQ'){
+ const sport=presets[selectedLegend].sport;
+ jumpT=.65;
+ if(sport==='football'){
+   headerT=.45;
+   notice('קפיצה לנגיחה! 🧠⚽');
+   sayCommentary('¡Va de cabeza!','עולה לנגיחה!');
+   if(!ballOwned && Math.hypot(ball.position.x-px,ball.position.z-pz)<1.25 && ball.position.y>.65){
+     ball.position.y=1.65;ball.position.x=px;ball.position.z=pz-.15;bvx=(Math.random()-.5)*1.0;bvz=-13.5;
+   }
+ }else{
+   notice('קפיצה! 🏀');
+ }
+}
+if(e.code==='KeyG'&&presets[selectedLegend].sport==='football'){
+ jumpT=.55;handT=.42;notice('נגיעה עם היד! ✋⚽');sayCommentary('¡Con la mano!','מראדונה שולח יד לכדור!');
+ if(!ballOwned && Math.hypot(ball.position.x-px,ball.position.z-pz)<1.3 && ball.position.y>.55){
+   ball.position.y=1.8;ball.position.x=px;ball.position.z=pz-.1;bvx=(Math.random()-.5)*.8;bvz=-13.8;
+ }
+}
+if(e.code==='KeyB'&&presets[selectedLegend].sport==='basketball'){
+ dunkT=.8;jumpT=.8;
+ if(Math.hypot(px,pz+12)<3.2){
+   score+=2;$('s1').textContent=score;notice('הטבעה! 🔥🏀');sayCommentary('¡Mate espectacular!','הטבעה אדירה!');
+ }else{
+   notice('תתקרב לסל כדי להטביע 🏀');
+ }
+}
+if(e.code==='Space'&&kickT<=0){kickT=.55;if(ballOwned){ballOwned=false;bvx=(Math.random()-.5)*1.1;bvz=-15;if(juggleT>0||juggleHeight>.2){ball.position.y=Math.max(ball.position.y,.65);notice('הקפצה מעל השוער! 🌈⚽');sayCommentary('¡La vaselina!','צ׳יפ מעל השוער!')}else notice('בעיטה! ⚽');sayCommentary('¡Disparo!','בעיטה לשער!')}}});
 addEventListener('keyup',e=>keys.delete(e.code));
 function update(dt){
  if(!active)return;
  msgT-=dt;if(msgT<=0)$('msg').textContent='';
  commentT-=dt;if(commentT<=0)$('commentary').textContent='';
- fakeT=Math.max(0,fakeT-dt);kickT=Math.max(0,kickT-dt);celebrateT=Math.max(0,celebrateT-dt);
+ fakeT=Math.max(0,fakeT-dt);kickT=Math.max(0,kickT-dt);celebrateT=Math.max(0,celebrateT-dt);jumpT=Math.max(0,jumpT-dt);headerT=Math.max(0,headerT-dt);handT=Math.max(0,handT-dt);dunkT=Math.max(0,dunkT-dt);
  if(juggleT>0){
    juggleT-=dt;
    juggleVel-=9.2*dt;
@@ -229,13 +265,21 @@ function update(dt){
  let dx=(keys.has('KeyD')||keys.has('ArrowRight')?1:0)-(keys.has('KeyA')||keys.has('ArrowLeft')?1:0),dz=(keys.has('KeyS')||keys.has('ArrowDown')?1:0)-(keys.has('KeyW')||keys.has('ArrowUp')?1:0);let n=Math.hypot(dx,dz)||1;
  const sprint=keys.has('ShiftLeft')&&stamina>1&&(dx||dz);const speed=sprint?7.4:5.0;stamina=T.MathUtils.clamp(stamina+(sprint?-24:17)*dt,0,100);$('st').style.width=stamina+'%';
  vx=T.MathUtils.lerp(vx,dx/n*speed,1-Math.exp(-dt*9));vz=T.MathUtils.lerp(vz,dz/n*speed,1-Math.exp(-dt*9));if(!dx&&!dz){vx*=Math.exp(-dt*11);vz*=Math.exp(-dt*11)}
- px=T.MathUtils.clamp(px+vx*dt,-14,14);pz=T.MathUtils.clamp(pz+vz*dt,-22,22);const sp=Math.hypot(vx,vz);if(sp>.15){const a=Math.atan2(vx,vz),d=Math.atan2(Math.sin(a-player.rotation.y),Math.cos(a-player.rotation.y));player.rotation.y+=d*(1-Math.exp(-dt*10))}
+ const isBB=presets[selectedLegend].sport==='basketball';px=T.MathUtils.clamp(px+vx*dt,isBB?-7:-14,isBB?7:14);pz=T.MathUtils.clamp(pz+vz*dt,isBB?-13:-22,isBB?13:22);const sp=Math.hypot(vx,vz);if(sp>.15){const a=Math.atan2(vx,vz),d=Math.atan2(Math.sin(a-player.rotation.y),Math.cos(a-player.rotation.y));player.rotation.y+=d*(1-Math.exp(-dt*10))}
  anim+=dt*(2.5+sp*1.3);const wave=Math.sin(anim),stride=Math.min(sp/6,1);
  legL.hip.rotation.x=T.MathUtils.lerp(legL.hip.rotation.x,wave*.75*stride,1-Math.exp(-dt*16));legR.hip.rotation.x=T.MathUtils.lerp(legR.hip.rotation.x,-wave*.75*stride,1-Math.exp(-dt*16));
  legL.knee.rotation.x=T.MathUtils.lerp(legL.knee.rotation.x,Math.max(0,-wave)*1.05*stride,1-Math.exp(-dt*18));legR.knee.rotation.x=T.MathUtils.lerp(legR.knee.rotation.x,Math.max(0,wave)*1.05*stride,1-Math.exp(-dt*18));
  armL.sh.rotation.x=-wave*.55*stride;armR.sh.rotation.x=wave*.55*stride;armL.el.rotation.x=-.35;armR.el.rotation.x=-.35;torso.rotation.z=Math.sin(anim)*.04*stride;head.rotation.z=-torso.rotation.z*.5;
  if(fakeT>0){const t=1-fakeT/.55,sw=Math.sin(t*Math.PI);legR.hip.rotation.x=-1.15*sw;legR.knee.rotation.x=.85*sw;torso.rotation.z=.18*sw}
  if(kickT>0){const t=1-kickT/.55,sw=Math.sin(t*Math.PI);legR.hip.rotation.x=-1.45*sw;legR.knee.rotation.x=.65*(1-sw);armL.sh.rotation.x=-.7*sw}
+ if(jumpT>0){
+   const jt=1-jumpT/.8;
+   const rise=Math.max(0,Math.sin(jt*Math.PI))*(dunkT>0?.75:.42);
+   pelvis.position.y=.92+rise;
+   if(headerT>0){torso.rotation.x=-.35;head.rotation.x=-.45;armL.sh.rotation.z=-.45;armR.sh.rotation.z=.45;}
+   if(handT>0){armL.sh.rotation.z=-1.15;armL.sh.rotation.x=-.9;armL.el.rotation.x=-.35;}
+   if(dunkT>0){armR.sh.rotation.z=.55;armR.sh.rotation.x=-1.4;armR.el.rotation.x=-.25;torso.rotation.x=-.12;}
+ }
  if(celebrateT>0){
    const ct=2.6-celebrateT;
    const jump=Math.max(0,Math.sin(ct*6.2))*.22;
@@ -252,7 +296,7 @@ function update(dt){
    head.rotation.y=Math.sin(ct*3.2)*.16;
    player.rotation.y+=dt*.72;
  }else{
-   pelvis.position.y=.92;
+   if(jumpT<=0)pelvis.position.y=.92;
    torso.rotation.x*=Math.exp(-dt*8);
    head.rotation.y*=Math.exp(-dt*8);
  }
@@ -268,13 +312,20 @@ function update(dt){
  }
  if(ballOwned){
    const dr=Math.sin(anim*1.55)*.24;
-   if(juggleT>0){
+   if(presets[selectedLegend].sport==='basketball'){
+     const bounce=.55+Math.abs(Math.sin(anim*1.8))*.42;
+     ball.position.set(px+.34, bounce, pz-.08);
+     if(dunkT>0){
+       const t=1-dunkT/.8;
+       ball.position.set(px+.15,1.55+Math.sin(t*Math.PI)*1.45,pz-.15);
+     }
+   }else if(juggleT>0){
      const forward=.20;
      ball.position.set(px+Math.sin(player.rotation.y)*forward,juggleHeight,pz+Math.cos(player.rotation.y)*forward);
      const kickPhase=Math.max(0,Math.min(1,(juggleHeight-.13)/.75));
      legR.hip.rotation.x=-.45*(1-kickPhase);
      legR.knee.rotation.x=.55*(1-kickPhase);
-   }else{
+   }else if(presets[selectedLegend].sport==='football'){
      juggleHeight=0;
      ball.position.set(px+Math.sin(player.rotation.y)*(.38+dr),.13,pz+Math.cos(player.rotation.y)*(.38+dr));
    }
@@ -294,7 +345,7 @@ function update(dt){
    if(ball.position.z<-23.2){if(Math.abs(ball.position.x)<3){score++;$('s1').textContent=score;if(!training)celebrateT=2.6;notice(training?'פגיעה טובה! המשך להתאמן ⚽':'גווווול! חגיגה! 🔥');sayCommentary(training?'¡Buen toque!':'¡Gooooool!','שער! איזה ביצוע!')}else notice('כמעט!');setTimeout(()=>{ballOwned=true;ball.position.set(px,.13,pz-.4)},450)}if(Math.hypot(ball.position.x-px,ball.position.z-pz)<.5)ballOwned=true}
  const target=zoom
  ? new T.Vector3(px+Math.cos(player.rotation.y)*3.1,1.85,pz-Math.sin(player.rotation.y)*3.1)
- : new T.Vector3(px,8.2,pz+11.5);
+ : new T.Vector3(px,presets[selectedLegend].sport==='basketball'?6.8:8.2,pz+(presets[selectedLegend].sport==='basketball'?8.8:11.5));
 camera.position.lerp(target,1-Math.exp(-dt*4));
 camera.lookAt(px,zoom?1.05:.7,pz);
 }
