@@ -14,13 +14,7 @@
 button{border:0;border-radius:13px;background:#f3cd68;color:#101820;font-weight:900;font-size:18px;padding:13px 26px;cursor:pointer;margin:6px}button.secondary{background:#203a54;color:#fff;border:1px solid #ffffff22}
 #cards{display:grid;grid-template-columns:repeat(4,minmax(170px,1fr));gap:10px;width:min(980px,95vw);margin:18px 0}.legendCard{background:#ffffff0c;border:1px solid #ffffff20;border-radius:16px;padding:14px 16px;cursor:pointer}.legendCard.active{outline:3px solid #f3cd68;background:#ffffff24;transform:translateY(-2px)}.legendCard b{display:block;font-size:18px}.legendCard .n{font-size:34px;font-weight:900;color:#8bd2fa}.small{font-size:12px;color:#9db2c5}@media(max-width:800px){#cards{grid-template-columns:1fr 1fr}}
 #stamina{position:absolute;left:18px;bottom:18px;width:170px}.bar{height:7px;background:#ffffff22;border-radius:20px;overflow:hidden;margin-top:5px}.bar i{display:block;height:100%;width:100%;background:#f3cd68}
-.lineupList{display:flex;flex-direction:column;gap:8px}.lineupPlayer{display:flex;align-items:center;justify-content:flex-start;gap:10px;background:#ffffff0b;border:1px solid #ffffff18;border-radius:11px;padding:8px;text-align:right}.portrait{width:58px;height:58px;border-radius:10px;object-fit:cover;display:block;border:2px solid #ffffff66;flex:0 0 58px;background:#173049}.portraitFallback{width:52px;height:52px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,#84cef5,#fff);color:#10253a;font-weight:900;border:2px solid #ffffff66;flex:0 0 52px}.teamPhoto{width:100%;max-height:180px;object-fit:cover;border-radius:12px;border:1px solid #ffffff22;margin:8px 0 12px}
-@keyframes camFlash{0%{opacity:0}8%{opacity:1}100%{opacity:0}}
-@keyframes cupBounce{0%{transform:translateX(-50%) translateY(32px) scale(.92)}60%{transform:translateX(-50%) translateY(-18px) scale(1.04)}100%{transform:translateX(-50%) translateY(0) scale(1)}}
-@keyframes teamPop{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-.fakePlayer{width:42px;border-radius:16px 16px 10px 10px;position:relative;background:linear-gradient(180deg,#84cef5,#fff)}
-.fakePlayer:before{content:"";position:absolute;top:-18px;left:50%;transform:translateX(-50%);width:22px;height:22px;background:#b67b57;border-radius:50%}
-[hidden]{display:none!important}
+.lineupList{display:flex;flex-direction:column;gap:8px}.lineupPlayer{display:flex;align-items:center;justify-content:flex-start;gap:10px;background:#ffffff0b;border:1px solid #ffffff18;border-radius:11px;padding:8px;text-align:right}.portrait{width:58px;height:58px;border-radius:10px;object-fit:cover;display:block;border:2px solid #ffffff66;flex:0 0 58px;background:#173049}.portraitFallback{width:52px;height:52px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,#84cef5,#fff);color:#10253a;font-weight:900;border:2px solid #ffffff66;flex:0 0 52px}[hidden]{display:none!important}
 </style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"}}</script>
 </head>
@@ -46,29 +40,6 @@ button{border:0;border-radius:13px;background:#f3cd68;color:#101820;font-weight:
     <div id="lineupStatus" style="font-size:18px;font-weight:900;color:#ffe287;margin-bottom:12px"></div>
     <div id="lineupTeams" style="display:grid;grid-template-columns:1fr 1fr;gap:18px;text-align:right;max-height:58vh;overflow:auto;padding:2px"></div>
     <div class="small" style="margin-top:12px">עוד רגע עוברים אוטומטית לצילום הקבוצה...</div>
-  </div>
-</div>
-<div id="cinematic" hidden style="position:fixed;inset:0;background:#07111df6;z-index:11;display:flex;align-items:center;justify-content:center;padding:24px">
-  <div style="text-align:center;max-width:1000px;width:95%">
-    <div id="cineTitle" style="font-size:34px;font-weight:900;margin-bottom:14px">רגע היסטורי</div>
-    <div id="cineStage" style="position:relative;margin:0 auto;width:min(900px,92vw);height:min(62vh,520px);background:linear-gradient(180deg,#18324a,#0e1e2f);border-radius:18px;overflow:hidden;border:1px solid #ffffff22">
-      <img id="cinePhoto" src="" alt="Team photo" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transform:scale(1.03);transition:opacity .45s ease,transform .7s ease">
-      <div id="cineFlash" style="position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none"></div>
-      <div id="cineFakeTeam" style="position:absolute;left:50%;bottom:42px;transform:translateX(-50%);display:flex;gap:8px;align-items:flex-end;transition:opacity .45s ease"></div>
-    </div>
-    <div id="cineCaption" style="margin-top:14px;font-size:22px;font-weight:700">הקבוצה מסתדרת לצילום...</div>
-  </div>
-</div>
-<div id="ceremony" hidden style="position:fixed;inset:0;background:linear-gradient(#07111df5,#10253af5);z-index:15;display:flex;align-items:center;justify-content:center;padding:24px">
-  <div style="text-align:center;width:min(980px,96vw)">
-    <div style="font-size:34px;font-weight:900;margin-bottom:14px">טקס גביע העולם</div>
-    <div style="position:relative;height:430px;border-radius:18px;overflow:hidden;background:linear-gradient(#17344d,#0c1d2d);border:1px solid #ffffff22">
-      <div id="stage" style="position:absolute;left:10%;right:10%;bottom:28px;height:105px;background:#303947;border-top:10px solid #d9b64b;border-radius:18px 18px 5px 5px"></div>
-      <div id="finalCup" style="position:absolute;left:50%;bottom:118px;transform:translateX(-50%);font-size:92px">🏆</div>
-      <div id="captainLift" style="position:absolute;left:50%;bottom:58px;transform:translateX(-50%);font-size:74px;opacity:0;transition:opacity .5s ease,transform 1s ease">🙌<span style="font-size:110px">🏆</span>🙌</div>
-      <div id="ceremonyTeam" style="position:absolute;left:50%;bottom:45px;transform:translateX(-50%);display:flex;gap:8px;align-items:flex-end"></div>
-    </div>
-    <div id="ceremonyCaption" style="margin-top:14px;font-size:22px;font-weight:800">הגביע מונח על הבמה...</div>
   </div>
 </div>
 <div id="ui" hidden>
@@ -339,8 +310,6 @@ function applyLegend(){
  $('matchDesc').textContent=p.desc;
  // Argentina stripes only for Maradona; keep the others cleaner.
  torso.children.forEach(o=>{if(o.material===stripeMat)o.visible=selectedLegend==='maradona'});opponentsGroup.visible=p.sport==='football';basketballGroup.visible=p.sport==='basketball';field.visible=p.sport==='football';teammatesGroup.visible=p.sport==='football';trophyGroup.visible=false;photoBoard.visible=false;teammates.forEach(t=>t.children[0].material.color.setHex(p.shirt));ball.material.color.setHex(p.sport==='basketball'?0xd86f16:0xf6f2e7);
- const tp=getTeamPhotoForLegend();
- if(tp){texLoader.load(tp,tex=>{tex.colorSpace=T.SRGBColorSpace;boardMat.map=tex;boardMat.needsUpdate=true;},undefined,()=>{});}
 }
 document.querySelectorAll('.legendCard').forEach(card=>card.onclick=()=>{
  selectedLegend=card.dataset.legend;
@@ -359,49 +328,6 @@ function lineupCard(name,cls=''){
    ? '<img class="portrait" src="'+src+'" alt="'+name+'" onerror="this.outerHTML=\'<div class=&quot;portraitFallback&quot;>'+portraitInitials(name)+'</div>\'">'
    : '<div class="portraitFallback">'+portraitInitials(name)+'</div>';
  return '<div class="lineupPlayer">'+pic+'<div style="flex:1"><b>'+name+'</b><div class="small">מונדיאל 1986</div></div></div>';
-}
-function playCameraClick(){
- try{
-   const AC=window.AudioContext||window.webkitAudioContext;
-   if(!AC)return;
-   const ctx=new AC(),o=ctx.createOscillator(),g=ctx.createGain();
-   o.type='square';o.frequency.setValueAtTime(1400,ctx.currentTime);o.frequency.exponentialRampToValueAtTime(220,ctx.currentTime+.08);
-   g.gain.setValueAtTime(.0001,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.18,ctx.currentTime+.005);g.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+.12);
-   o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+.13);
- }catch(e){}
-}
-function getTeamPhotoForLegend(){
- if(selectedLegend==='maradona')return teamImages.argentina;
- if(selectedLegend==='pele')return teamImages.brazil||teamImages.argentina;
- if(selectedLegend==='jordan')return teamImages.bulls||'';
- if(selectedLegend==='kobe')return teamImages.lakers||'';
- return '';
-}
-function buildFakeTeamPhoto(){
- const wrap=$('cineFakeTeam');wrap.innerHTML='';
- const count=(selectedLegend==='jordan'||selectedLegend==='kobe')?5:11;
- for(let i=0;i<count;i++){
-   const p=document.createElement('div');p.className='fakePlayer';
-   p.style.height=(i===count-1?86:70)+'px';
-   p.style.width=(i===count-1?48:42)+'px';
-   // goalkeeper at the edge
-   if(i===count-1 && presets[selectedLegend].sport==='football')p.style.background='linear-gradient(180deg,#244f9c,#193a72)';
-   else if(selectedLegend==='pele')p.style.background='linear-gradient(180deg,#f3db32,#2e8b57)';
-   else if(selectedLegend==='jordan')p.style.background='linear-gradient(180deg,#c81f32,#fff)';
-   else if(selectedLegend==='kobe')p.style.background='linear-gradient(180deg,#f2bf32,#542583)';
-   wrap.appendChild(p);
- }
-}
-function playPostLineupCinematic(onDone){
- const c=$('cinematic'),photo=$('cinePhoto'),fake=$('cineFakeTeam'),flash=$('cineFlash'),cap=$('cineCaption');
- c.hidden=false;photo.style.opacity='0';photo.style.transform='scale(1.03)';fake.style.opacity='1';cap.textContent='שחקני ארגנטינה מסתדרים אחד ליד השני...';
- buildFakeTeamPhoto();
- photo.src=getTeamPhotoForLegend()||'';
- sayCommentary('¡Argentina se prepara para la foto oficial!','ארגנטינה מסתדרת לצילום הרשמי!',{rate:.96,pitch:1.04});
- setTimeout(()=>{cap.textContent='השוער עומד בקצה. כולם מוכנים...';},1000);
- setTimeout(()=>{cap.textContent='מצלמים!';playCameraClick();flash.style.animation='camFlash .35s ease';setTimeout(()=>flash.style.animation='',380)},2000);
- setTimeout(()=>{fake.style.opacity='0';photo.style.opacity='1';photo.style.transform='scale(1)';cap.textContent='התמונה האמיתית של הקבוצה';sayCommentary('¡La foto histórica de Argentina!','התמונה ההיסטורית של ארגנטינה!',{rate:.96,pitch:1.03})},2600);
- setTimeout(()=>{c.hidden=true;if(onDone)onDone()},5200);
 }
 function showLineup(){
  const l=lineups[selectedLegend],p=presets[selectedLegend];
@@ -427,12 +353,10 @@ function showLineup(){
  window.__lineupAuto=setTimeout(()=>{
    try{if('speechSynthesis' in window)speechSynthesis.cancel();}catch(e){}
    $('lineup').hidden=true;
-   playPostLineupCinematic(()=>{
-     active=true;
-     $('ui').hidden=false;
-     notice(presets[selectedLegend].match);
-     sayCommentary('¡Arranca el partidazo! ¡Vamos, vamos, vamos!','המשחק הגדול יוצא לדרך!',{rate:1.05,pitch:1.08});
-   });
+   active=true;
+   $('ui').hidden=false;
+   notice(presets[selectedLegend].match);
+   sayCommentary('¡Arranca el partidazo! ¡Vamos, vamos, vamos!','המשחק הגדול יוצא לדרך!',{rate:1.05,pitch:1.08});
  },6500);
 }
 function start(c,isTraining=false){career=c;training=isTraining;active=false;$('menu').hidden=true;$('ui').hidden=true;px=0;pz=8;score=0;matchTime=90;ceremonyStarted=false;$('matchClock').textContent='90';stamina=100;juggleT=0;juggleQueue=0;juggleCount=0;juggleHeight=0;juggleVel=0;jumpT=0;headerT=0;handT=0;dunkT=0;cornerMode=false;penaltyMode=false;handGoalPending=false;passT=0;passTarget=null;$('juggleText').textContent='';$('commentary').textContent='';player.rotation.y=Math.PI;defenders[0].position.set(-2.8,0,-4);defenders[1].position.set(2.5,0,-7);defenders[2].position.set(-1.2,0,-11);defenders[3].position.set(1.5,0,-15);keeper.position.set(0,0,-22.2);keeper2.position.set(0,0,22.2);const tPos=[[-5.5,8],[0,9],[5.5,8],[-6.5,3],[-2.2,2],[2.2,2],[6.5,3],[-4.2,-4],[0,-6],[4.2,-4]];
