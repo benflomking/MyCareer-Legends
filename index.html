@@ -14,7 +14,11 @@
 button{border:0;border-radius:13px;background:#f3cd68;color:#101820;font-weight:900;font-size:18px;padding:13px 26px;cursor:pointer;margin:6px}button.secondary{background:#203a54;color:#fff;border:1px solid #ffffff22}
 #cards{display:grid;grid-template-columns:repeat(4,minmax(170px,1fr));gap:10px;width:min(980px,95vw);margin:18px 0}.legendCard{background:#ffffff0c;border:1px solid #ffffff20;border-radius:16px;padding:14px 16px;cursor:pointer}.legendCard.active{outline:3px solid #f3cd68;background:#ffffff24;transform:translateY(-2px)}.legendCard b{display:block;font-size:18px}.legendCard .n{font-size:34px;font-weight:900;color:#8bd2fa}.small{font-size:12px;color:#9db2c5}@media(max-width:800px){#cards{grid-template-columns:1fr 1fr}}
 #stamina{position:absolute;left:18px;bottom:18px;width:170px}.bar{height:7px;background:#ffffff22;border-radius:20px;overflow:hidden;margin-top:5px}.bar i{display:block;height:100%;width:100%;background:#f3cd68}
-.lineupList{display:flex;flex-direction:column;gap:8px}.lineupPlayer{display:flex;align-items:center;justify-content:flex-start;gap:10px;background:#ffffff0b;border:1px solid #ffffff18;border-radius:11px;padding:8px;text-align:right}.portrait{width:58px;height:58px;border-radius:10px;object-fit:cover;display:block;border:2px solid #ffffff66;flex:0 0 58px;background:#173049}.portraitFallback{width:52px;height:52px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,#84cef5,#fff);color:#10253a;font-weight:900;border:2px solid #ffffff66;flex:0 0 52px}[hidden]{display:none!important}
+.lineupList{display:flex;flex-direction:column;gap:8px}.lineupPlayer{display:flex;align-items:center;justify-content:flex-start;gap:10px;background:#ffffff0b;border:1px solid #ffffff18;border-radius:11px;padding:8px;text-align:right}.portrait{width:58px;height:58px;border-radius:10px;object-fit:cover;display:block;border:2px solid #ffffff66;flex:0 0 58px;background:#173049}.portraitFallback{width:52px;height:52px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,#84cef5,#fff);color:#10253a;font-weight:900;border:2px solid #ffffff66;flex:0 0 52px}@keyframes photoFlashShot{0%{opacity:0}10%{opacity:1}100%{opacity:0}}
+.photoPlayer{width:42px;height:74px;border-radius:14px 14px 9px 9px;position:relative;background:linear-gradient(180deg,#84cef5,#fff)}
+.photoPlayer:before{content:"";position:absolute;top:-18px;left:50%;transform:translateX(-50%);width:22px;height:22px;background:#b67b57;border-radius:50%}
+.photoKeeper{width:48px;height:88px;background:linear-gradient(180deg,#244f9c,#193a72)}
+[hidden]{display:none!important}
 </style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"}}</script>
 </head>
@@ -42,7 +46,18 @@ button{border:0;border-radius:13px;background:#f3cd68;color:#101820;font-weight:
     <div class="small" style="margin-top:12px">עוד רגע עוברים אוטומטית לצילום הקבוצה...</div>
   </div>
 </div>
-<div id="ui" hidden>
+<div id="photoAnim" hidden style="position:fixed;inset:0;background:#07111df5;z-index:12;display:flex;align-items:center;justify-content:center;padding:24px">
+      <div style="width:min(980px,96vw);text-align:center">
+        <div style="font-size:30px;font-weight:900;margin-bottom:12px">צילום הקבוצה</div>
+        <div style="position:relative;height:min(62vh,500px);background:linear-gradient(180deg,#17344d,#0c1d2d);border-radius:18px;overflow:hidden;border:1px solid #ffffff22">
+          <img id="photoReal" src="" alt="Team photo" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .45s ease">
+          <div id="photoTeamRow" style="position:absolute;left:50%;bottom:85px;transform:translateX(-50%);display:flex;gap:9px;align-items:flex-end;transition:opacity .35s ease"></div>
+          <div id="photoFlash" style="position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none"></div>
+        </div>
+        <div id="photoCaption" style="margin-top:14px;font-size:20px;font-weight:800">השחקנים מסתדרים לצילום...</div>
+      </div>
+    </div>
+    <div id="ui" hidden>
  <div id="top"><div class="title" id="playerTitle">MARADONA • 10</div><div class="small" id="matchTitle">ארגנטינה נגד אנגליה</div><div class="score"><span id="s1">0</span> : <span id="s2">0</span></div><div class="small">זמן: <span id="matchClock">90</span></div></div>
  <div class="badge" id="cam">מצלמה: משחק</div>
  <div id="msg"></div>
@@ -329,6 +344,40 @@ function lineupCard(name,cls=''){
    : '<div class="portraitFallback">'+portraitInitials(name)+'</div>';
  return '<div class="lineupPlayer">'+pic+'<div style="flex:1"><b>'+name+'</b><div class="small">מונדיאל 1986</div></div></div>';
 }
+function playCameraClick(){
+ try{
+   const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+   const ctx=new AC(),o=ctx.createOscillator(),g=ctx.createGain();
+   o.type='square';o.frequency.setValueAtTime(1500,ctx.currentTime);o.frequency.exponentialRampToValueAtTime(220,ctx.currentTime+.08);
+   g.gain.setValueAtTime(.0001,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.18,ctx.currentTime+.005);g.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+.12);
+   o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+.13);
+ }catch(e){}
+}
+function buildPhotoPlayers(){
+ const row=$('photoTeamRow');row.innerHTML='';
+ const count=presets[selectedLegend].sport==='football'?11:5;
+ for(let i=0;i<count;i++){
+   const d=document.createElement('div');
+   d.className='photoPlayer'+(i===count-1&&presets[selectedLegend].sport==='football'?' photoKeeper':'');
+   row.appendChild(d);
+ }
+}
+function getTeamPhotoForLegend(){
+ if(selectedLegend==='maradona')return teamImages.argentina;
+ if(selectedLegend==='pele')return teamImages.brazil||'';
+ if(selectedLegend==='jordan')return teamImages.bulls||'';
+ if(selectedLegend==='kobe')return teamImages.lakers||'';
+ return '';
+}
+function playTeamPhotoSequence(onDone){
+ const wrap=$('photoAnim'),row=$('photoTeamRow'),real=$('photoReal'),flash=$('photoFlash'),cap=$('photoCaption');
+ buildPhotoPlayers();real.src=getTeamPhotoForLegend()||'';row.style.opacity='1';real.style.opacity='0';wrap.hidden=false;
+ cap.textContent='השחקנים והשוער מסתדרים לצילום...';
+ setTimeout(()=>{cap.textContent='כולם מוכנים...';},900);
+ setTimeout(()=>{cap.textContent='צילום!';playCameraClick();flash.style.animation='photoFlashShot .35s ease';setTimeout(()=>flash.style.animation='',380)},1800);
+ setTimeout(()=>{row.style.opacity='0';real.style.opacity='1';cap.textContent='התמונה האמיתית של הקבוצה';},2350);
+ setTimeout(()=>{wrap.hidden=true;if(onDone)onDone();},4700);
+}
 function showLineup(){
  const l=lineups[selectedLegend],p=presets[selectedLegend];
  const awayName=p.match.includes(' נגד ')?p.match.split(' נגד ')[1]:'יריבה';
@@ -353,10 +402,12 @@ function showLineup(){
  window.__lineupAuto=setTimeout(()=>{
    try{if('speechSynthesis' in window)speechSynthesis.cancel();}catch(e){}
    $('lineup').hidden=true;
-   active=true;
-   $('ui').hidden=false;
-   notice(presets[selectedLegend].match);
-   sayCommentary('¡Arranca el partidazo! ¡Vamos, vamos, vamos!','המשחק הגדול יוצא לדרך!',{rate:1.05,pitch:1.08});
+   playTeamPhotoSequence(()=>{
+     active=true;
+     $('ui').hidden=false;
+     notice(presets[selectedLegend].match);
+     sayCommentary('¡Arranca el partidazo! ¡Vamos, vamos, vamos!','המשחק הגדול יוצא לדרך!',{rate:1.05,pitch:1.08});
+   });
  },6500);
 }
 function start(c,isTraining=false){career=c;training=isTraining;active=false;$('menu').hidden=true;$('ui').hidden=true;px=0;pz=8;score=0;matchTime=90;ceremonyStarted=false;$('matchClock').textContent='90';stamina=100;juggleT=0;juggleQueue=0;juggleCount=0;juggleHeight=0;juggleVel=0;jumpT=0;headerT=0;handT=0;dunkT=0;cornerMode=false;penaltyMode=false;handGoalPending=false;passT=0;passTarget=null;$('juggleText').textContent='';$('commentary').textContent='';player.rotation.y=Math.PI;defenders[0].position.set(-2.8,0,-4);defenders[1].position.set(2.5,0,-7);defenders[2].position.set(-1.2,0,-11);defenders[3].position.set(1.5,0,-15);keeper.position.set(0,0,-22.2);keeper2.position.set(0,0,22.2);const tPos=[[-5.5,8],[0,9],[5.5,8],[-6.5,3],[-2.2,2],[2.2,2],[6.5,3],[-4.2,-4],[0,-6],[4.2,-4]];
