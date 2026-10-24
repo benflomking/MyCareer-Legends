@@ -407,9 +407,6 @@ function showLineup(){
  const awayName=p.match.includes(' נגד ')?p.match.split(' נגד ')[1]:'יריבה';
  const homeCls=selectedLegend==='pele'?'bra':'';
  const awayCls=selectedLegend==='pele'?'uru':(selectedLegend==='maradona'?'eng':'');
- $('teamPhotos').innerHTML=selectedLegend==='maradona'
-   ? '<div><b>ארגנטינה 1986</b><img class="teamPhoto" src="'+teamImages.argentina+'" alt="Argentina 1986 team"></div><div><b>אנגליה 1986</b><img class="teamPhoto" src="'+teamImages.england+'" alt="England 1986 team"></div>'
-   : '';
  $('lineupTeams').innerHTML=
    '<div><b>'+p.name+'</b><div class="lineupList">'+l.home.map(v=>lineupCard(v,homeCls)).join('')+'</div></div>'+
    '<div><b>'+awayName+'</b><div class="lineupList">'+l.away.map(v=>lineupCard(v,awayCls)).join('')+'</div></div>';
