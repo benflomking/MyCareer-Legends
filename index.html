@@ -102,15 +102,15 @@ for(let i=0;i<9;i++){
  const bang=sphere(.032+(i%3)*.006,.03,.031,hair,head);
  bang.position.set(-.105+i*.027,.105-(i%2)*.025,.145+Math.sin(i)*.018);
 }
-function arm(side){const sh=new T.Group();sh.name='shoulder'+side;sh.position.set(side==='L'?-.35:.35,.20,0,);torso.add(sh);const sleeve=mesh(new T.CylinderGeometry(.11,.115,.20,14),sky,sh);sleeve.rotation.z=Math.PI/2;
+function arm(side){const sh=new T.Group();sh.name='shoulder'+side;sh.position.set(side==='L'?-.30:.30,.19,0,);torso.add(sh);const sleeve=mesh(new T.CylinderGeometry(.115,.12,.28,14),sky,sh);sleeve.rotation.z=Math.PI/2;
 if(side==='L'){
   const captainBand=mesh(new T.CylinderGeometry(.128,.128,.075,18),mat(0x315a7d,.7),sh);
   captainBand.rotation.z=Math.PI/2;
   captainBand.position.set(-.03,-.01,0);
 }
-const upper=new T.Group();upper.position.set(side==='L'?-.12:.12,0,0);sh.add(upper);limb(new T.Vector3(0,0,0),new T.Vector3(side==='L'?-.05:.05,-.27,0),.065,skin,upper);const el=new T.Group();el.name='elbow'+side;el.position.set(side==='L'?-.05:.05,-.27,0);upper.add(el);limb(new T.Vector3(0,0,0),new T.Vector3(side==='L'?-.02:.02,-.27,-.01),.05,skin,el);const hand=sphere(.06,.075,.05,skin,el);hand.position.set(side==='L'?-.02:.02,-.30,-.01);return {sh,el}}
+const upper=new T.Group();upper.position.set(side==='L'?-.16:.16,-.01,0);sh.add(upper);limb(new T.Vector3(side==='L'?-.02:.02,-.02,0),new T.Vector3(side==='L'?-.055:.055,-.27,0),.062,skin,upper);const el=new T.Group();el.name='elbow'+side;el.position.set(side==='L'?-.05:.05,-.27,0);upper.add(el);limb(new T.Vector3(0,0,0),new T.Vector3(side==='L'?-.02:.02,-.27,-.01),.05,skin,el);const hand=sphere(.06,.075,.05,skin,el);hand.position.set(side==='L'?-.02:.02,-.30,-.01);return {sh,el}}
 const armL=arm('L'),armR=arm('R');
-function leg(side){const hip=new T.Group();hip.name='hip'+side;hip.position.set(side==='L'?-.13:.13,-.05,0);pelvis.add(hip);const short=mesh(new T.CylinderGeometry(.14,.13,.25,14),shorts,hip);short.position.y=-.13;limb(new T.Vector3(0,-.22,0),new T.Vector3(0,-.52,0),.09,skin,hip);const knee=new T.Group();knee.name='knee'+side;knee.position.y=-.52;hip.add(knee);sphere(.075,.07,.075,skin,knee);limb(new T.Vector3(0,-.04,0),new T.Vector3(0,-.39,.01),.065,skin,knee);const sk=mesh(new T.CylinderGeometry(.065,.06,.19,12),sock,knee);sk.position.y=-.39;const foot=new T.Group();foot.name='foot'+side;foot.position.set(0,-.50,-.05);knee.add(foot);const shoe=mesh(new T.BoxGeometry(.15,.09,.30),black,foot);shoe.position.z=-.08;shoe.rotation.x=-.08;return {hip,knee,foot}}
+function leg(side){const hip=new T.Group();hip.name='hip'+side;hip.position.set(side==='L'?-.13:.13,-.05,0);pelvis.add(hip);const short=mesh(new T.CylinderGeometry(.14,.13,.25,14),shorts,hip);short.position.y=-.13;limb(new T.Vector3(0,-.22,0),new T.Vector3(0,-.52,0),.09,skin,hip);const knee=new T.Group();knee.name='knee'+side;knee.position.y=-.52;hip.add(knee);sphere(.075,.07,.075,skin,knee);limb(new T.Vector3(0,-.04,0),new T.Vector3(0,-.39,.01),.065,skin,knee);const sk=mesh(new T.CylinderGeometry(.065,.06,.19,12),sock,knee);sk.position.y=-.39;const foot=new T.Group();foot.name='foot'+side;foot.position.set(0,-.50,-.05);knee.add(foot);const shoe=mesh(new T.BoxGeometry(.15,.09,.30),black,foot);shoe.position.z=.10;shoe.rotation.x=.08;return {hip,knee,foot}}
 const legL=leg('L'),legR=leg('R');
 const ten=document.createElement('canvas');ten.width=256;ten.height=256;const tc=ten.getContext('2d');tc.clearRect(0,0,256,256);tc.font='bold 176px Arial';tc.textAlign='center';tc.textBaseline='middle';tc.lineWidth=16;tc.strokeStyle='#111111';tc.strokeText('10',128,135);tc.fillStyle='#111111';tc.fillText('10',128,135);const ttex=new T.CanvasTexture(ten);ttex.needsUpdate=true;
 const numBack=mesh(new T.PlaneGeometry(.42,.42),new T.MeshBasicMaterial({map:ttex,transparent:true,side:T.DoubleSide,depthWrite:false}),torso);
@@ -162,12 +162,12 @@ function update(dt){
    const jump=Math.max(0,Math.sin(ct*6.2))*.22;
    pelvis.position.y=.92+jump;
    // realistic celebration: arms up and out, elbows bent, no shoulder clipping
-   armL.sh.rotation.z=-1.18;
-   armR.sh.rotation.z=1.18;
-   armL.sh.rotation.x=-.58;
-   armR.sh.rotation.x=-.58;
-   armL.el.rotation.x=-1.0;
-   armR.el.rotation.x=-1.0;
+   armL.sh.rotation.z=-.92;
+   armR.sh.rotation.z=.92;
+   armL.sh.rotation.x=-.42;
+   armR.sh.rotation.x=-.42;
+   armL.el.rotation.x=-1.15;
+   armR.el.rotation.x=-1.15;
    torso.rotation.x=-.08;
    torso.rotation.z=Math.sin(ct*5.5)*.07;
    head.rotation.y=Math.sin(ct*3.2)*.16;
