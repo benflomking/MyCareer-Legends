@@ -241,29 +241,24 @@ const nose=sphere(.042,.055,.070,skin,head);nose.position.set(0,-.012,.175);
 for(const sx of [-1,1]){const e=sphere(.033,.018,.012,white,head);e.position.set(sx*.065,.045,.155);const iris=sphere(.011,.01,.008,black,head);iris.position.set(sx*.065,.045,.168);const brow=mesh(new T.BoxGeometry(.065,.012,.012),hair,head);brow.position.set(sx*.064,.083,.164);brow.rotation.z=sx*.08}
 const mouth=mesh(new T.BoxGeometry(.07,.012,.012),mat(0x6b322c,.7),head);mouth.position.set(0,-.08,.16);
 const hairBase=sphere(.19,.125,.185,hair,head);hairBase.position.y=.145;
-// תלתלים מבולגנים יותר, עם נפח בצדדים וקווצות שנופלות קדימה
-for(let i=0;i<92;i++){
- const a=i*2.39996+Math.sin(i*1.7)*.28;
- const rr=.092+((i*37)%18)/175;
- const y=.055+((i*23)%20)/130;
- const curl=sphere(.026+((i*11)%8)/205,.025+((i*5)%8)/205,.027+((i*13)%8)/205,hair,head);
- let cx=Math.cos(a)*rr+Math.sin(i)*.008;
- let cz=Math.sin(a)*rr*.82+Math.cos(i*1.3)*.010;
- // Lower, tighter and more unified hair mass behind the head.
- if(Math.abs(cx)>.075){
-   cx*=.48;
-   cz-=.12;
- }
- if(Math.abs(cx)>.10){
-   cx*=.82;
-   cz-=.03;
- }
- curl.position.set(cx,y,cz);
- curl.rotation.set(i*.37,i*.21,i*.16);
-}
-for(let i=0;i<9;i++){
- const bang=sphere(.032+(i%3)*.006,.03,.031,hair,head);
- bang.position.set(-.105+i*.027,.105-(i%2)*.025,.145+Math.sin(i)*.018);
+// תלתלים קדמיים + שכפול שלהם מאחורי הראש.
+// אין יותר "טלטלים צדדיים" נפרדים.
+for(let i=0;i<11;i++){
+ const x=-.125+i*.025;
+ const y=.105-(i%2)*.024+Math.sin(i*.9)*.006;
+ const zFront=.145+Math.sin(i)*.016;
+ const sx=.032+(i%3)*.006;
+ const sy=.030+((i+1)%3)*.003;
+ const sz=.031+(i%2)*.004;
+
+ const frontCurl=sphere(sx,sy,sz,hair,head);
+ frontCurl.position.set(x,y,zFront);
+ frontCurl.rotation.set(i*.18,i*.12,i*.10);
+
+ // העתק מדויק של התלתל הקדמי, רק מאחור.
+ const backCurl=sphere(sx,sy,sz,hair,head);
+ backCurl.position.set(x,y-.012,-.145-Math.sin(i)*.016);
+ backCurl.rotation.copy(frontCurl.rotation);
 }
 function arm(side){
  const dir=side==='L'?-1:1;
