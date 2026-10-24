@@ -67,9 +67,9 @@ const neck=sphere(.09,.11,.09,skin,torso);neck.position.y=.38;
 const head=new T.Group();head.name='head';head.position.y=.53;torso.add(head);
 sphere(.17,.21,.17,skin,head);
 const jaw=sphere(.135,.10,.145,skin,head);jaw.position.set(0,-.13,-.018);
-const nose=sphere(.032,.044,.055,skin,head);nose.position.set(0,-.015,-.17);
-for(const sx of [-1,1]){const e=sphere(.033,.018,.012,white,head);e.position.set(sx*.065,.045,-.155);const iris=sphere(.011,.01,.008,black,head);iris.position.set(sx*.065,.045,-.168);const brow=mesh(new T.BoxGeometry(.065,.012,.012),hair,head);brow.position.set(sx*.064,.083,-.164);brow.rotation.z=sx*.08}
-const mouth=mesh(new T.BoxGeometry(.07,.012,.012),mat(0x6b322c,.7),head);mouth.position.set(0,-.08,-.16);
+const nose=sphere(.032,.044,.055,skin,head);nose.position.set(0,-.015,.17);
+for(const sx of [-1,1]){const e=sphere(.033,.018,.012,white,head);e.position.set(sx*.065,.045,.155);const iris=sphere(.011,.01,.008,black,head);iris.position.set(sx*.065,.045,.168);const brow=mesh(new T.BoxGeometry(.065,.012,.012),hair,head);brow.position.set(sx*.064,.083,.164);brow.rotation.z=sx*.08}
+const mouth=mesh(new T.BoxGeometry(.07,.012,.012),mat(0x6b322c,.7),head);mouth.position.set(0,-.08,.16);
 const hairBase=sphere(.19,.125,.185,hair,head);hairBase.position.y=.145;
 // תלתלים מבולגנים יותר, עם נפח בצדדים וקווצות שנופלות קדימה
 for(let i=0;i<58;i++){
@@ -82,7 +82,7 @@ for(let i=0;i<58;i++){
 }
 for(let i=0;i<9;i++){
  const bang=sphere(.032+(i%3)*.006,.03,.031,hair,head);
- bang.position.set(-.105+i*.027,.105-(i%2)*.025,-.145-Math.sin(i)*.018);
+ bang.position.set(-.105+i*.027,.105-(i%2)*.025,.145+Math.sin(i)*.018);
 }
 function arm(side){const sh=new T.Group();sh.name='shoulder'+side;sh.position.set(side==='L'?-.35:.35,.20,0,);torso.add(sh);const sleeve=mesh(new T.CylinderGeometry(.11,.115,.20,14),sky,sh);sleeve.rotation.z=Math.PI/2;const upper=new T.Group();upper.position.set(side==='L'?-.12:.12,0,0);sh.add(upper);limb(new T.Vector3(0,0,0),new T.Vector3(side==='L'?-.05:.05,-.27,0),.065,skin,upper);const el=new T.Group();el.name='elbow'+side;el.position.set(side==='L'?-.05:.05,-.27,0);upper.add(el);limb(new T.Vector3(0,0,0),new T.Vector3(side==='L'?-.02:.02,-.27,-.01),.05,skin,el);const hand=sphere(.06,.075,.05,skin,el);hand.position.set(side==='L'?-.02:.02,-.30,-.01);return {sh,el}}
 const armL=arm('L'),armR=arm('R');
@@ -102,7 +102,7 @@ function update(dt){
  let dx=(keys.has('KeyD')||keys.has('ArrowRight')?1:0)-(keys.has('KeyA')||keys.has('ArrowLeft')?1:0),dz=(keys.has('KeyS')||keys.has('ArrowDown')?1:0)-(keys.has('KeyW')||keys.has('ArrowUp')?1:0);let n=Math.hypot(dx,dz)||1;
  const sprint=keys.has('ShiftLeft')&&stamina>1&&(dx||dz);const speed=sprint?7.4:5.0;stamina=T.MathUtils.clamp(stamina+(sprint?-24:17)*dt,0,100);$('st').style.width=stamina+'%';
  vx=T.MathUtils.lerp(vx,dx/n*speed,1-Math.exp(-dt*9));vz=T.MathUtils.lerp(vz,dz/n*speed,1-Math.exp(-dt*9));if(!dx&&!dz){vx*=Math.exp(-dt*11);vz*=Math.exp(-dt*11)}
- px=T.MathUtils.clamp(px+vx*dt,-14,14);pz=T.MathUtils.clamp(pz+vz*dt,-22,22);const sp=Math.hypot(vx,vz);if(sp>.15){const a=Math.atan2(-vx,-vz),d=Math.atan2(Math.sin(a-player.rotation.y),Math.cos(a-player.rotation.y));player.rotation.y+=d*(1-Math.exp(-dt*10))}
+ px=T.MathUtils.clamp(px+vx*dt,-14,14);pz=T.MathUtils.clamp(pz+vz*dt,-22,22);const sp=Math.hypot(vx,vz);if(sp>.15){const a=Math.atan2(vx,vz),d=Math.atan2(Math.sin(a-player.rotation.y),Math.cos(a-player.rotation.y));player.rotation.y+=d*(1-Math.exp(-dt*10))}
  anim+=dt*(2.5+sp*1.3);const wave=Math.sin(anim),stride=Math.min(sp/6,1);
  legL.hip.rotation.x=T.MathUtils.lerp(legL.hip.rotation.x,wave*.75*stride,1-Math.exp(-dt*16));legR.hip.rotation.x=T.MathUtils.lerp(legR.hip.rotation.x,-wave*.75*stride,1-Math.exp(-dt*16));
  legL.knee.rotation.x=T.MathUtils.lerp(legL.knee.rotation.x,Math.max(0,-wave)*1.05*stride,1-Math.exp(-dt*18));legR.knee.rotation.x=T.MathUtils.lerp(legR.knee.rotation.x,Math.max(0,wave)*1.05*stride,1-Math.exp(-dt*18));
