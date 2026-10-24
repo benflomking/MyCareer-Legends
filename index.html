@@ -14,7 +14,7 @@
 button{border:0;border-radius:13px;background:#f3cd68;color:#101820;font-weight:900;font-size:18px;padding:13px 26px;cursor:pointer;margin:6px}button.secondary{background:#203a54;color:#fff;border:1px solid #ffffff22}
 #cards{display:grid;grid-template-columns:repeat(4,minmax(170px,1fr));gap:10px;width:min(980px,95vw);margin:18px 0}.legendCard{background:#ffffff0c;border:1px solid #ffffff20;border-radius:16px;padding:14px 16px;cursor:pointer}.legendCard.active{outline:3px solid #f3cd68;background:#ffffff24;transform:translateY(-2px)}.legendCard b{display:block;font-size:18px}.legendCard .n{font-size:34px;font-weight:900;color:#8bd2fa}.small{font-size:12px;color:#9db2c5}@media(max-width:800px){#cards{grid-template-columns:1fr 1fr}}
 #stamina{position:absolute;left:18px;bottom:18px;width:170px}.bar{height:7px;background:#ffffff22;border-radius:20px;overflow:hidden;margin-top:5px}.bar i{display:block;height:100%;width:100%;background:#f3cd68}
-.lineupList{display:grid;grid-template-columns:repeat(2,minmax(120px,1fr));gap:8px}.lineupPlayer{display:flex;align-items:center;gap:9px;background:#ffffff0b;border:1px solid #ffffff18;border-radius:11px;padding:8px}.portrait{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#84cef5,#fff);color:#10253a;font-weight:900;border:2px solid #ffffff66;flex:0 0 42px}.portrait.eng{background:linear-gradient(135deg,#fff,#d64545)}.portrait.bra{background:linear-gradient(135deg,#f3db32,#2e8b57)}.portrait.uru{background:linear-gradient(135deg,#fff,#7cc7f3)}
+.lineupList{display:grid;grid-template-columns:repeat(2,minmax(120px,1fr));gap:8px}.lineupPlayer{display:flex;align-items:center;gap:9px;background:#ffffff0b;border:1px solid #ffffff18;border-radius:11px;padding:8px}.portrait{width:52px;height:52px;border-radius:10px;object-fit:cover;display:block;border:2px solid #ffffff66;flex:0 0 52px;background:#173049}.portraitFallback{width:52px;height:52px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,#84cef5,#fff);color:#10253a;font-weight:900;border:2px solid #ffffff66;flex:0 0 52px}.teamPhoto{width:100%;max-height:180px;object-fit:cover;border-radius:12px;border:1px solid #ffffff22;margin:8px 0 12px}
 [hidden]{display:none!important}
 </style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"}}</script>
@@ -38,7 +38,8 @@ button{border:0;border-radius:13px;background:#f3cd68;color:#101820;font-weight:
     <div id="trophy" style="font-size:58px;line-height:1">🏆</div>
     <h2 style="margin:6px 0">הרכבים</h2>
     <div class="small" style="margin-bottom:12px">מונדיאל 1986 • השדרן מקריא את ההרכבים</div>
-    <div id="lineupTeams" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;text-align:right;max-height:62vh;overflow:auto"></div>
+    <div id="teamPhotos" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px"></div>
+    <div id="lineupTeams" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;text-align:right;max-height:54vh;overflow:auto"></div>
     <button id="lineupStart">התחל משחק</button>
   </div>
 </div>
@@ -85,6 +86,34 @@ const lineups={
  jordan:{home:['Ron Harper','Michael Jordan 23','Scottie Pippen','Dennis Rodman','Luc Longley'],away:['John Stockton','Jeff Hornacek','Bryon Russell','Karl Malone','Greg Ostertag']},
  kobe:{home:['Derek Fisher','Kobe Bryant 8','Rick Fox','Robert Horry','Shaquille O’Neal'],away:['Allen Iverson','Eric Snow','George Lynch','Tyrone Hill','Dikembe Mutombo']}
 };
+const browserImages={
+ 'Pumpido':'https://media.diariouno.com.ar/p/6943689314a2c67c88b13a7aac7bcea3/adjuntos/298/imagenes/008/755/0008755618/1200x0/smart/pumpidojpg.jpg',
+ 'Cuciuffo':'https://www.elgrafico.com.ar/media/cache/pub_news_details_large/media/i/54/84/54844a55895f4.jpg',
+ 'Brown':'https://arroyitoyelmundo.com/uploads/images/image_750x_5d5212797fc65.jpg',
+ 'Ruggeri':'https://media.diariopopular.com.ar/p/1635349662ee7aee3244eb023a612967/adjuntos/143/imagenes/007/721/0007721042/1200x675/smart/ruggeri-mexico86jpg.jpg',
+ 'Batista':'https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_47,w_5367,h_3018/c_fill,w_720,ar_16:9,f_auto,q_auto,g_auto/images/voltaxMediaLibrary/mmsport/sports_illustrated_ftbol/01k0pvdsyqxa8e8h1rpn.jpg',
+ 'Burruchaga':'https://assets.goal.com/images/v3/blt1636a8c7813d8f0a/JorgeB.jpg',
+ 'Enrique':'https://www.futebolportenho.com.br/wp-content/uploads/2017/04/Enrique01.jpg',
+ 'Giusti':'https://i.pinimg.com/736x/45/04/6b/45046bf9ef62594013e64fa4b1967c0c.jpg',
+ 'Valdano':'https://images2.minutemediacdn.com/image/upload/v1753114926/images/voltaxMediaLibrary/mmsport/sports_illustrated_ftbol/01k0pwneeadnetvmhaqn.jpg',
+ 'Maradona 10':'https://backend.memorabid.com/media/articles/7357/95e955f4-8a41-4871-ac49-ccf66b25a15a.jpeg?w=600',
+ 'Olarticoechea':'https://assets.goal.com/images/v3/bltef403ddc371a0d3b/Julio.jpg?auto=webp&format=pjpg&quality=60&width=1080',
+ 'Shilton':'https://assets.goal.com/images/v3/blt837395038b1c5e96/GOAL%20-%20Blank%20WEB%20-%20Facebook%20-%202024-09-08T155334.147.png?auto=webp&format=pjpg&quality=60&width=2048',
+ 'Gary Stevens':'https://prints.colorsport.co.uk/sq/210/mexico-the-1986-world-cup-7618529.jpg.webp',
+ 'Fenwick':'https://www.infobae.com/resizer/v2/PKAT45CSXBGZ3BMQBQWIELVW3I.jpg?auth=77f24308d7bf2edf346f64ef8537e345c415ee611e446246aaab720eafa69e4e&height=1200&quality=85&smart=true&width=1200',
+ 'Butcher':'https://prints.colorsport.co.uk/sq/210/mexico-the-1986-world-cup-7618529.jpg.webp',
+ 'Sansom':'https://medias.lequipe.fr/img-photo-jpg/kenny-sansom-avec-le-maillot-des-trois-lions-lors-du-mondial-1986-au-mexique-a-lecoq-l-equipe/1500000001423209/0:0,1986:1324-640-427-75/2049f.jpg',
+ 'Hoddle':'https://cdn.mos.cms.futurecdn.net/9WzExeZPC29yBfLUzKKsLj-1200-80.jpg',
+ 'Reid':'https://www.thefa.com/-/media/thefacom-new/images/england/mens-senior/archive/140520-800-peter-reid-86.ashx?as=0&thn=0',
+ 'Trevor Steven':'https://img.ricardostatic.ch/images/93ad2d04-e9ae-484d-b018-268c998ac365/t_1000x750/panini-sammelbild-mexico86-wm-trevor-steven-england',
+ 'Barnes':'https://www.thefa.com/-/media/thefacom-new/images/england/mens-senior/archive/140420-800-john-barnes-argentina.ashx?as=0&thn=0',
+ 'Beardsley':'https://prints.colorsport.co.uk/sq/210/mexico-the-1986-world-cup-7618529.jpg.webp',
+ 'Lineker':'https://i.guim.co.uk/img/media/9ba3dbffd64219153af58a62a882081bbef717a0/0_0_1540_1770/master/1540.jpg?crop=none&dpr=1&s=none&width=445'
+};
+const teamImages={
+ argentina:'https://commons.wikimedia.org/wiki/Special:Redirect/file/Argentina_before_playing_final.jpg',
+ england:'https://prints.colorsport.co.uk/sq/210/mexico-the-1986-world-cup-7618529.jpg.webp'
+};
 const scene=new T.Scene();scene.background=new T.Color(0x88b8d5);scene.fog=new T.Fog(0x88b8d5,42,85);
 const renderer=new T.WebGLRenderer({antialias:true,powerPreference:'low-power'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.35));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.outputColorSpace=T.SRGBColorSpace;document.body.prepend(renderer.domElement);
 const camera=new T.PerspectiveCamera(52,innerWidth/innerHeight,.1,120);
@@ -110,6 +139,13 @@ const trophyBase=new T.Mesh(new T.CylinderGeometry(.23,.23,.10,20),black);trophy
 const h1=new T.Mesh(new T.TorusGeometry(.22,.035,8,20,Math.PI),gold);h1.rotation.z=Math.PI/2;h1.position.set(-.25,.42,0);trophyGroup.add(h1);
 const h2=h1.clone();h2.position.x=.25;h2.rotation.z=-Math.PI/2;trophyGroup.add(h2);
 trophyGroup.position.set(0,.08,0);
+const photoBoard=new T.Group();scene.add(photoBoard);
+const boardFrame=new T.Mesh(new T.BoxGeometry(5.4,3.2,.10),black);boardFrame.position.set(0,2.25,18.0);photoBoard.add(boardFrame);
+const boardMat=new T.MeshBasicMaterial({color:0xdddddd});
+const boardPic=new T.Mesh(new T.PlaneGeometry(5.1,2.9),boardMat);boardPic.position.set(0,2.25,17.94);boardPic.rotation.y=Math.PI;photoBoard.add(boardPic);
+const texLoader=new T.TextureLoader();
+texLoader.load(teamImages.argentina,tex=>{tex.colorSpace=T.SRGBColorSpace;boardMat.map=tex;boardMat.needsUpdate=true;},undefined,()=>{});
+photoBoard.visible=true;
 
 // Opponents and goalkeeper for football matches.
 const opponentsGroup=new T.Group();scene.add(opponentsGroup);
@@ -270,7 +306,7 @@ function applyLegend(){
  $('matchTitle').textContent=training?'אימון חופשי':p.match;
  $('matchDesc').textContent=p.desc;
  // Argentina stripes only for Maradona; keep the others cleaner.
- torso.children.forEach(o=>{if(o.material===stripeMat)o.visible=selectedLegend==='maradona'});opponentsGroup.visible=p.sport==='football';basketballGroup.visible=p.sport==='basketball';field.visible=p.sport==='football';teammatesGroup.visible=p.sport==='football';trophyGroup.visible=p.sport==='football';teammates.forEach(t=>t.children[0].material.color.setHex(p.shirt));ball.material.color.setHex(p.sport==='basketball'?0xd86f16:0xf6f2e7);
+ torso.children.forEach(o=>{if(o.material===stripeMat)o.visible=selectedLegend==='maradona'});opponentsGroup.visible=p.sport==='football';basketballGroup.visible=p.sport==='basketball';field.visible=p.sport==='football';teammatesGroup.visible=p.sport==='football';trophyGroup.visible=p.sport==='football';photoBoard.visible=p.sport==='football';teammates.forEach(t=>t.children[0].material.color.setHex(p.shirt));ball.material.color.setHex(p.sport==='basketball'?0xd86f16:0xf6f2e7);
 }
 document.querySelectorAll('.legendCard').forEach(card=>card.onclick=()=>{
  selectedLegend=card.dataset.legend;
@@ -284,13 +320,20 @@ function portraitInitials(name){
  return (parts[0]?.[0]||'')+(parts[1]?.[0]||'');
 }
 function lineupCard(name,cls=''){
- return '<div class="lineupPlayer"><div class="portrait '+cls+'">'+portraitInitials(name)+'</div><div><b>'+name+'</b><div class="small">מונדיאל 1986</div></div></div>';
+ const src=browserImages[name]||'';
+ const pic=src
+   ? '<img class="portrait" src="'+src+'" alt="'+name+'" onerror="this.outerHTML=\'<div class=&quot;portraitFallback&quot;>'+portraitInitials(name)+'</div>\'">'
+   : '<div class="portraitFallback">'+portraitInitials(name)+'</div>';
+ return '<div class="lineupPlayer">'+pic+'<div><b>'+name+'</b><div class="small">מונדיאל 1986 • תמונה מהדפדפן</div></div></div>';
 }
 function showLineup(){
  const l=lineups[selectedLegend],p=presets[selectedLegend];
  const awayName=p.match.includes(' נגד ')?p.match.split(' נגד ')[1]:'יריבה';
  const homeCls=selectedLegend==='pele'?'bra':'';
  const awayCls=selectedLegend==='pele'?'uru':(selectedLegend==='maradona'?'eng':'');
+ $('teamPhotos').innerHTML=selectedLegend==='maradona'
+   ? '<div><b>ארגנטינה 1986</b><img class="teamPhoto" src="'+teamImages.argentina+'" alt="Argentina 1986 team"></div><div><b>אנגליה 1986</b><img class="teamPhoto" src="'+teamImages.england+'" alt="England 1986 team"></div>'
+   : '';
  $('lineupTeams').innerHTML=
    '<div><b>'+p.name+'</b><div class="lineupList">'+l.home.map(v=>lineupCard(v,homeCls)).join('')+'</div></div>'+
    '<div><b>'+awayName+'</b><div class="lineupList">'+l.away.map(v=>lineupCard(v,awayCls)).join('')+'</div></div>';
