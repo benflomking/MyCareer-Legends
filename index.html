@@ -244,19 +244,19 @@ const hairBase=sphere(.19,.125,.185,hair,head);hairBase.position.y=.145;
 // תלתלים מבולגנים יותר, עם נפח בצדדים וקווצות שנופלות קדימה
 for(let i=0;i<92;i++){
  const a=i*2.39996+Math.sin(i*1.7)*.28;
- const rr=.10+((i*37)%21)/155;
- const y=.085+((i*23)%23)/115;
- const curl=sphere(.025+((i*11)%9)/205,.024+((i*5)%10)/205,.026+((i*13)%10)/210,hair,head);
- let cx=Math.cos(a)*rr+Math.sin(i)*.012;
- let cz=Math.sin(a)*rr*.76+Math.cos(i*1.3)*.014;
- // Side curls stay close to the skull and sit behind the head.
- if(Math.abs(cx)>.09){
-   cx*=.62;
-   cz-=.10;
+ const rr=.092+((i*37)%18)/175;
+ const y=.055+((i*23)%20)/130;
+ const curl=sphere(.026+((i*11)%8)/205,.025+((i*5)%8)/205,.027+((i*13)%8)/205,hair,head);
+ let cx=Math.cos(a)*rr+Math.sin(i)*.008;
+ let cz=Math.sin(a)*rr*.82+Math.cos(i*1.3)*.010;
+ // Lower, tighter and more unified hair mass behind the head.
+ if(Math.abs(cx)>.075){
+   cx*=.48;
+   cz-=.12;
  }
- if(Math.abs(cx)>.115){
+ if(Math.abs(cx)>.10){
    cx*=.82;
-   cz-=.035;
+   cz-=.03;
  }
  curl.position.set(cx,y,cz);
  curl.rotation.set(i*.37,i*.21,i*.16);
