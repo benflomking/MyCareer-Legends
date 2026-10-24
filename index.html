@@ -215,14 +215,37 @@ basketballGroup.visible=false;
 
 
 const player=new T.Group();scene.add(player);player.position.set(0,0,8);player.rotation.y=Math.PI;
+const armatureRoot=new T.Bone();armatureRoot.name='ArmatureRoot';player.add(armatureRoot);
+const bonePelvis=new T.Bone();bonePelvis.name='pelvis_bone';armatureRoot.add(bonePelvis);
+const boneSpine=new T.Bone();boneSpine.name='spine_bone';boneSpine.position.y=.34;bonePelvis.add(boneSpine);
+const boneNeck=new T.Bone();boneNeck.name='neck_bone';boneNeck.position.y=.38;boneSpine.add(boneNeck);
+const boneHead=new T.Bone();boneHead.name='head_bone';boneHead.position.y=.50;boneNeck.add(boneHead);
+const boneShoulderL=new T.Bone();boneShoulderL.name='shoulder_L';boneShoulderL.position.set(-.30,.18,0);boneSpine.add(boneShoulderL);
+const boneElbowL=new T.Bone();boneElbowL.name='elbow_L';boneElbowL.position.set(-.25,-.27,0);boneShoulderL.add(boneElbowL);
+const boneHandL=new T.Bone();boneHandL.name='hand_L';boneHandL.position.set(-.02,-.30,0);boneElbowL.add(boneHandL);
+const boneShoulderR=new T.Bone();boneShoulderR.name='shoulder_R';boneShoulderR.position.set(.30,.18,0);boneSpine.add(boneShoulderR);
+const boneElbowR=new T.Bone();boneElbowR.name='elbow_R';boneElbowR.position.set(.25,-.27,0);boneShoulderR.add(boneElbowR);
+const boneHandR=new T.Bone();boneHandR.name='hand_R';boneHandR.position.set(.02,-.30,0);boneElbowR.add(boneHandR);
+const boneHipL=new T.Bone();boneHipL.name='hip_L';boneHipL.position.set(-.135,-.05,0);bonePelvis.add(boneHipL);
+const boneKneeL=new T.Bone();boneKneeL.name='knee_L';boneKneeL.position.set(0,-.54,0);boneHipL.add(boneKneeL);
+const boneFootL=new T.Bone();boneFootL.name='foot_L';boneFootL.position.set(0,-.51,-.05);boneKneeL.add(boneFootL);
+const boneHipR=new T.Bone();boneHipR.name='hip_R';boneHipR.position.set(.135,-.05,0);bonePelvis.add(boneHipR);
+const boneKneeR=new T.Bone();boneKneeR.name='knee_R';boneKneeR.position.set(0,-.54,0);boneHipR.add(boneKneeR);
+const boneFootR=new T.Bone();boneFootR.name='foot_R';boneFootR.position.set(0,-.51,-.05);boneKneeR.add(boneFootR);
+const armatureBones=[bonePelvis,boneSpine,boneNeck,boneHead,boneShoulderL,boneElbowL,boneHandL,boneShoulderR,boneElbowR,boneHandR,boneHipL,boneKneeL,boneFootL,boneHipR,boneKneeR,boneFootR];
+const armatureSkeleton=new T.Skeleton(armatureBones);
 function mesh(g,m,parent=player){const o=new T.Mesh(g,m);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o}
 function sphere(sx,sy,sz,m,parent=player){const o=mesh(new T.SphereGeometry(1,20,14),m,parent);o.scale.set(sx,sy,sz);return o}
 function limb(a,b,r,m,parent){const d=new T.Vector3().subVectors(b,a),o=mesh(new T.CylinderGeometry(r*.84,r,1,12),m,parent);o.position.copy(a).add(b).multiplyScalar(.5);o.scale.y=d.length();o.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),d.clone().normalize());return o}
 const pelvis=new T.Group();pelvis.name='pelvis';pelvis.position.y=.92;player.add(pelvis);
 const torso=new T.Group();torso.name='body';torso.position.y=.36;pelvis.add(torso);
+const hipMassL=sphere(.18,.16,.17,shorts,pelvis);hipMassL.position.set(-.12,-.10,0);
+const hipMassR=sphere(.18,.16,.17,shorts,pelvis);hipMassR.position.set(.12,-.10,0);
 const chest=mesh(new T.CylinderGeometry(.34,.25,.62,32),sky,torso);chest.scale.set(1.12,1,0.96);
 const chestUpper=sphere(.325,.195,.242,sky,torso);chestUpper.position.y=.11;
+const ribMass=sphere(.292,.22,.225,sky,torso);ribMass.position.y=-.05;
 const waist=sphere(.232,.165,.202,sky,torso);waist.position.y=-.22;
+const abdomen=sphere(.245,.17,.205,sky,torso);abdomen.position.y=-.15;
 const stripeMat=white;
 // Argentina shirt stripes on both front (+Z) and back (-Z)
 for(const x of [-.20,0,.20]){
@@ -239,7 +262,10 @@ const cheekL=sphere(.061,.052,.040,skin,head);cheekL.position.set(-.092,-.026,.1
 const cheekR=sphere(.061,.052,.040,skin,head);cheekR.position.set(.092,-.026,.132);
 const earL=sphere(.032,.052,.025,skin,head);earL.position.set(-.175,.015,.01);
 const earR=sphere(.032,.052,.025,skin,head);earR.position.set(.175,.015,.01);
+const browMassL=sphere(.075,.035,.030,skin,head);browMassL.position.set(-.065,.078,.135);
+const browMassR=sphere(.075,.035,.030,skin,head);browMassR.position.set(.065,.078,.135);
 const nose=sphere(.046,.058,.076,skin,head);nose.position.set(0,-.014,.178);
+const chin=sphere(.085,.050,.070,skin,head);chin.position.set(0,-.155,.065);
 for(const sx of [-1,1]){const e=sphere(.033,.018,.012,white,head);e.position.set(sx*.065,.045,.155);const iris=sphere(.011,.01,.008,black,head);iris.position.set(sx*.065,.045,.168);const brow=mesh(new T.BoxGeometry(.065,.012,.012),hair,head);brow.position.set(sx*.064,.083,.164);brow.rotation.z=sx*.08}
 const mouth=mesh(new T.BoxGeometry(.078,.013,.012),mat(0x6b322c,.7),head);mouth.position.set(0,-.082,.158);
 const hairBase=sphere(.192,.132,.222,hair,head);hairBase.position.set(0,.132,-.036);
@@ -265,6 +291,7 @@ for(let i=0;i<15;i++){
 function arm(side){
  const dir=side==='L'?-1:1;
  const sh=new T.Group();sh.name='shoulder'+side;sh.position.set(dir*.300,.19,0);torso.add(sh);
+ const deltoid=sphere(.13,.145,.12,sky,sh);deltoid.position.set(dir*.04,-.01,0);
 
  const sleeve=mesh(new T.CylinderGeometry(.12,.125,.30,18),sky,sh);
  sleeve.rotation.z=Math.PI/2;
@@ -278,9 +305,11 @@ function arm(side){
 
  const upper=new T.Group();upper.position.set(dir*.22,-.015,0);sh.add(upper);
  limb(new T.Vector3(0,-.03,0),new T.Vector3(dir*.025,-.27,0),.064,skin,upper);
+ const bicep=sphere(.072,.14,.068,skin,upper);bicep.position.set(dir*.012,-.14,.01);
 
  const el=new T.Group();el.name='elbow'+side;el.position.set(dir*.025,-.27,0);upper.add(el);
  limb(new T.Vector3(0,0,0),new T.Vector3(dir*.02,-.27,-.005),.052,skin,el);
+ const forearm=sphere(.057,.135,.054,skin,el);forearm.position.set(dir*.01,-.14,-.002);
 
  const hand=sphere(.064,.076,.052,skin,el);hand.position.set(dir*.02,-.30,-.005);
  return {sh,el,hand}
@@ -292,7 +321,9 @@ function leg(side){
  const thigh=sphere(.122,.185,.112,skin,hip);thigh.position.y=-.335;
  const knee=new T.Group();knee.name='knee'+side;knee.position.y=-.54;hip.add(knee);
  sphere(.082,.076,.08,skin,knee);
+ const kneecap=sphere(.070,.050,.072,skin,knee);kneecap.position.set(0,-.015,.045);
  const calf=sphere(.087,.175,.080,skin,knee);calf.position.set(0,-.215,.01);
+ const ankle=sphere(.066,.075,.064,skin,knee);ankle.position.set(0,-.39,.005);
  const sk=mesh(new T.CylinderGeometry(.07,.064,.20,14),sock,knee);sk.position.y=-.40;
  const foot=new T.Group();foot.name='foot'+side;foot.position.set(0,-.51,-.05);knee.add(foot);
  const shoe=mesh(new T.BoxGeometry(.17,.09,.35),black,foot);
@@ -661,6 +692,15 @@ function update(dt){
    torso.rotation.x*=Math.exp(-dt*8);
    head.rotation.y*=Math.exp(-dt*8);
  }
+ // Sync armature bones to visible rig so the character has a functional skeleton.
+ bonePelvis.position.copy(pelvis.position);bonePelvis.rotation.copy(pelvis.rotation);
+ boneSpine.rotation.copy(torso.rotation);
+ boneHead.rotation.copy(head.rotation);
+ boneShoulderL.rotation.copy(armL.sh.rotation);boneElbowL.rotation.copy(armL.el.rotation);
+ boneShoulderR.rotation.copy(armR.sh.rotation);boneElbowR.rotation.copy(armR.el.rotation);
+ boneHipL.rotation.copy(legL.hip.rotation);boneKneeL.rotation.copy(legL.knee.rotation);boneFootL.rotation.copy(legL.foot.rotation);
+ boneHipR.rotation.copy(legR.hip.rotation);boneKneeR.rotation.copy(legR.knee.rotation);boneFootR.rotation.copy(legR.foot.rotation);
+ // Sync armature bones to visible rig
  player.position.set(px,0,pz);
  if(career&&presets[selectedLegend].sport==='football'){
    teammates.forEach((t,i)=>{
