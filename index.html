@@ -85,7 +85,7 @@ const kBody=new T.Mesh(new T.CylinderGeometry(.30,.25,.70,18),mat(0x244f9c,.7));
 const kHead=new T.Mesh(new T.SphereGeometry(.18,16,12),skin);kHead.position.y=1.70;kHead.castShadow=true;keeper.add(kHead);
 const kArmL=new T.Mesh(new T.CylinderGeometry(.055,.065,.72,10),mat(0x244f9c,.7));kArmL.rotation.z=Math.PI/2;kArmL.position.set(-.38,1.35,0);keeper.add(kArmL);
 const kArmR=kArmL.clone();kArmR.position.x=.38;keeper.add(kArmR);
-keeper.position.set(0,0,-22.2);keeper2.position.set(0,0,22.2);
+keeper.position.set(0,0,-22.2);
 const keeper2=keeper.clone();keeper2.position.set(0,0,22.2);keeper2.rotation.y=Math.PI;opponentsGroup.add(keeper2);
 
 
@@ -183,7 +183,7 @@ document.querySelectorAll('.legendCard').forEach(card=>card.onclick=()=>{
  applyLegend();
 });
 applyLegend();
-function start(c,isTraining=false){career=c;training=isTraining;active=true;$('menu').hidden=true;$('ui').hidden=false;px=0;pz=8;score=0;stamina=100;juggleT=0;juggleQueue=0;juggleCount=0;juggleHeight=0;juggleVel=0;$('juggleText').textContent='';$('commentary').textContent='';player.rotation.y=Math.PI;defenders[0].position.set(-2.8,0,-4);defenders[1].position.set(2.5,0,-7);defenders[2].position.set(-1.2,0,-11);defenders[3].position.set(1.5,0,-15);keeper.position.set(0,0,-22.2);zoom=!!c;applyLegend();$('cam').textContent=zoom?'מצלמה: קריירה':'מצלמה: משחק';
+function start(c,isTraining=false){career=c;training=isTraining;active=true;$('menu').hidden=true;$('ui').hidden=false;px=0;pz=8;score=0;stamina=100;juggleT=0;juggleQueue=0;juggleCount=0;juggleHeight=0;juggleVel=0;$('juggleText').textContent='';$('commentary').textContent='';player.rotation.y=Math.PI;defenders[0].position.set(-2.8,0,-4);defenders[1].position.set(2.5,0,-7);defenders[2].position.set(-1.2,0,-11);defenders[3].position.set(1.5,0,-15);keeper.position.set(0,0,-22.2);keeper2.position.set(0,0,22.2);zoom=!!c;applyLegend();$('cam').textContent=zoom?'מצלמה: קריירה':'מצלמה: משחק';
  if(training){notice('מוד אימון — דריבל, בעיטות והקפצות עם J');}
  else if(c){notice('קריירת אגדות — המצלמה על השחקן');}
  else{notice(presets[selectedLegend].match);}
